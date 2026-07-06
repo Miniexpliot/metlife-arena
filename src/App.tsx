@@ -453,7 +453,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 font-sans overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-slate-50 font-sans overflow-hidden">
       
       {/* APP HEADER */}
       <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shadow-sm z-10 flex-shrink-0">
@@ -489,10 +489,10 @@ export default function App() {
       </header>
 
       {/* THREE-COLUMN SLEEK WORKSPACE */}
-      <main className="flex-1 overflow-hidden flex relative bg-slate-50">
+      <main className="flex-1 overflow-hidden flex relative bg-slate-50 min-h-0">
         
         {/* LEFT COLUMN: CONTROLS */}
-        <aside className={`w-full lg:w-72 bg-white lg:border-r border-slate-200 p-5 flex-col gap-6 overflow-y-auto flex-shrink-0 flex-1 lg:flex-none ${mobileTab === "controls" ? "flex" : "hidden lg:flex"}`}>
+        <aside className={`w-full lg:w-72 bg-white lg:border-r border-slate-200 p-5 flex-col gap-6 overflow-y-auto flex-shrink-0 flex-1 lg:flex-none min-h-0 ${mobileTab === "controls" ? "flex" : "hidden lg:flex"}`}>
           
           {/* Status Label */}
           <div>
@@ -669,7 +669,7 @@ export default function App() {
         </aside>
 
         {/* MIDDLE COLUMN: INTUITIVE CHAT SYSTEM */}
-        <section className={`flex-1 bg-slate-50 flex-col justify-between overflow-hidden relative ${mobileTab === "chat" ? "flex" : "hidden lg:flex"}`}>
+        <section className={`flex-1 bg-slate-50 flex-col justify-between overflow-hidden relative min-h-0 ${mobileTab === "chat" ? "flex" : "hidden lg:flex"}`}>
           
           {/* Top suggestion panel */}
           <div className="p-4 bg-white border-b border-slate-200 flex-shrink-0">
@@ -834,7 +834,7 @@ export default function App() {
         </section>
 
         {/* RIGHT COLUMN: INSIGHTS & UTILITY DECK */}
-        <aside className={`w-full lg:w-80 bg-slate-50 lg:border-l border-slate-200 flex-col overflow-hidden flex-shrink-0 flex-1 lg:flex-none ${mobileTab === "deck" ? "flex" : "hidden lg:flex"}`}>
+        <aside className={`w-full lg:w-80 bg-slate-50 lg:border-l border-slate-200 flex-col overflow-hidden flex-shrink-0 flex-1 lg:flex-none min-h-0 ${mobileTab === "deck" ? "flex" : "hidden lg:flex"}`}>
           
           {/* Deck selector headers */}
           <div className="grid grid-cols-3 bg-slate-100 border-b border-slate-200 p-1">
