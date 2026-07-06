@@ -25,7 +25,8 @@ import {
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCOEK_lOpCzZEbLFM-ptfw4nCViJv_NJIQ";
 // @ts-ignore
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const RAW_API_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL = RAW_API_URL.endsWith('/') ? RAW_API_URL.slice(0, -1) : RAW_API_URL;
 
 
 interface Restroom {
