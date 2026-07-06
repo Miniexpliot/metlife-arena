@@ -587,7 +587,12 @@ export default function App() {
                   <span className={`text-base font-bold ${
                     vitals.density === "High" ? "text-red-600" : vitals.density === "Medium" ? "text-amber-600" : "text-green-600"
                   }`}>{vitals.density}</span>
-                  <span className="text-[10px] text-indigo-600 font-medium pb-0.5 underline cursor-pointer hover:text-indigo-800 transition-colors" onClick={() => { setRightActiveTab("map"); setMobileTab("deck"); }}>Live Map</span>
+                  <button 
+                    className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md text-[10px] font-bold border border-indigo-200 transition-all shadow-sm active:scale-95" 
+                    onClick={() => { setRightActiveTab("map"); setMobileTab("deck"); }}
+                  >
+                    <MapPin size={12} /> Live Map
+                  </button>
                 </div>
               </div>
 
