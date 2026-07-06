@@ -1,6 +1,6 @@
 import Header from './components/Header';
 import MobileNav from './components/MobileNav';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import {
@@ -28,70 +28,15 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+import type { StadiumData, GateInfo, ChatMessage } from './types';
+
+// Environment variables injected by Vite at build time — kept outside component to avoid re-evaluation per render
 // @ts-ignore
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 // @ts-ignore
 const RAW_API_URL = import.meta.env.VITE_API_URL || '';
+// Normalize trailing slash to prevent double-slash in fetch URLs
 const API_BASE_URL = RAW_API_URL.endsWith('/') ? RAW_API_URL.slice(0, -1) : RAW_API_URL;
-
-interface Restroom {
-  name: string;
-  location: string;
-  types: string[];
-  wait_time_minutes: number;
-  crowd_status: string;
-}
-
-interface Concession {
-  name: string;
-  location: string;
-  cuisine: string;
-  menu: string[];
-  vegetarian_options: string[];
-  vegan_options: string[];
-  gluten_free_options: string[];
-  wait_time_minutes: number;
-  crowd_status: string;
-}
-
-interface Amenity {
-  name: string;
-  type: string;
-  location: string;
-  status: string;
-  details: string;
-}
-
-interface Sector {
-  id: string;
-  description: string;
-  gates: string[];
-  amenities: Amenity[];
-  concessions: Concession[];
-  restrooms: Restroom[];
-}
-
-interface GateInfo {
-  status: string;
-  security_wait_minutes: number;
-  crowd_density: string;
-}
-
-interface StadiumData {
-  stadium_name: string;
-  sectors: Sector[];
-  gate_status: { [key: string]: GateInfo };
-  emergency_info: {
-    emergency_number: string;
-    evacuation_assembly_points: string;
-    rules: string[];
-  };
-}
-
-interface ChatMessage {
-  role: 'user' | 'model';
-  text: string;
-}
 
 export default function App() {
   const [stadiumData, setStadiumData] = useState<StadiumData | null>(null);
@@ -407,18 +352,21 @@ export default function App() {
     }
   };
 
-  // Compile gates list for dynamic selection
-  const gateOptions: string[] = [];
-  if (stadiumData) {
-    stadiumData.sectors.forEach((sector) => {
-      sector.gates.forEach((gate) => {
-        gateOptions.push(`${sector.id} - ${gate}`);
+  // Memoize gate options to prevent O(sectors × gates) computation on every keystroke in chat input
+  const allLocationOptions = useMemo(() => {
+    const gateOpts: string[] = [];
+    if (stadiumData) {
+      stadiumData.sectors.forEach((sector) => {
+        sector.gates.forEach((gate) => {
+          gateOpts.push(`${sector.id} - ${gate}`);
+        });
       });
-    });
-  }
-  const allLocationOptions = [...customDetectedLocations, ...gateOptions];
+    }
+    return [...customDetectedLocations, ...gateOpts];
+  }, [stadiumData, customDetectedLocations]);
 
-  const getSelectedLocationVitals = () => {
+  // Memoize vitals to avoid recomputing averages across all gates on every render cycle
+  const vitals = useMemo(() => {
     if (!stadiumData) return { waitTime: '--', density: 'Unknown', flow: 'Unknown' };
 
     if (currentLocation.includes('Outside Stadium Boundaries')) {
@@ -440,7 +388,7 @@ export default function App() {
       };
     }
 
-    // If user is at a seat or unmapped zone, calculate the stadium average
+    // Fallback: compute stadium-wide average when user is at an unmapped seat/zone
     let totalWait = 0;
     let gateCount = 0;
     Object.values(stadiumData.gate_status).forEach((g: any) => {
@@ -456,9 +404,7 @@ export default function App() {
       density: 'Moderate',
       flow: 'Zone Average',
     };
-  };
-
-  const vitals = getSelectedLocationVitals();
+  }, [stadiumData, currentLocation]);
 
   // Custom Markdown renderer
   const renderMarkdown = (text: string) => {
@@ -554,11 +500,30 @@ export default function App() {
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
+                      role="listbox"
+                      aria-label="Location options"
                       className="absolute top-full left-0 right-0 z-50 bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto"
                     >
                       {allLocationOptions.map((opt) => (
                         <div
                           key={opt}
+                          role="option"
+                          aria-selected={currentLocation === opt}
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setCurrentLocation(opt);
+                              setIsLocationDropdownOpen(false);
+                              setMessages((prev) => [
+                                ...prev,
+                                {
+                                  role: 'model',
+                                  text: `📍 GPS relocated to **${opt}**. Sector-grounded concessions, medical aid, and gate routes are now prioritized for you.`,
+                                },
+                              ]);
+                            }
+                          }}
                           onClick={() => {
                             setCurrentLocation(opt);
                             setIsLocationDropdownOpen(false);
@@ -570,7 +535,7 @@ export default function App() {
                               },
                             ]);
                           }}
-                          className={`px-3 py-2 text-xs cursor-pointer hover:bg-indigo-50 transition-colors ${currentLocation === opt ? 'bg-indigo-50/50 text-indigo-700 font-bold' : 'text-slate-700'}`}
+                          className={`px-3 py-2 text-xs cursor-pointer hover:bg-indigo-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-inset ${currentLocation === opt ? 'bg-indigo-50/50 text-indigo-700 font-bold' : 'text-slate-700'}`}
                         >
                           {opt}
                         </div>
@@ -753,8 +718,14 @@ export default function App() {
             </div>
           </div>
 
-          {/* Messages Feed Area */}
-          <div className="flex-grow p-6 overflow-y-auto space-y-5" id="middle_chat_area">
+          {/* Messages Feed Area — role="log" tells screen readers to announce new messages */}
+          <div
+            role="log"
+            aria-live="polite"
+            aria-label="Chat messages"
+            className="flex-grow p-6 overflow-y-auto space-y-5"
+            id="middle_chat_area"
+          >
             {messages.map((msg, idx) => (
               <motion.div
                 key={idx}
@@ -855,7 +826,7 @@ export default function App() {
             ))}
 
             {isLoadingChat && (
-              <div className="flex gap-3 max-w-2xl">
+              <div role="status" aria-live="polite" className="flex gap-3 max-w-2xl">
                 <div className="w-8 h-8 rounded-full bg-indigo-600 shrink-0 flex items-center justify-center text-[10px] text-white font-bold">
                   AI
                 </div>
