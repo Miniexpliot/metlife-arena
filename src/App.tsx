@@ -93,12 +93,26 @@ export default function App() {
   const [stadiumData, setStadiumData] = useState<StadiumData | null>(null);
   const [currentLocation, setCurrentLocation] = useState<string>("Sector 1 - Gate A");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "model",
-      text: "👋 Welcome to the **FIFA World Cup 2026 Arena**! I am your AI Stadium Assistant. I am grounded in our live stadium database to provide real-time crowd updates, nearest concessions, first aid, and language translation. Where are you seated today?"
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const savedMessages = localStorage.getItem("STADIUM_CHAT_HISTORY");
+    if (savedMessages) {
+      try {
+        return JSON.parse(savedMessages);
+      } catch (e) {
+        console.error("Failed to parse chat history", e);
+      }
     }
-  ]);
+    return [
+      {
+        role: "model",
+        text: "👋 Welcome to the **FIFA World Cup 2026 Arena**! I am your AI Stadium Assistant. I am grounded in our live stadium database to provide real-time crowd updates, nearest concessions, first aid, and language translation. Where are you seated today?"
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("STADIUM_CHAT_HISTORY", JSON.stringify(messages));
+  }, [messages]);
   const [inputMessage, setInputMessage] = useState<string>("");
   const [isLoadingChat, setIsLoadingChat] = useState<boolean>(false);
   const [rightActiveTab, setRightActiveTab] = useState<"map" | "concessions" | "rules">("map");
