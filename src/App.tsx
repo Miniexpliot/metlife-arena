@@ -536,7 +536,10 @@ export default function App() {
                 </label>
                 <button
                   onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
-                  className="w-full flex justify-between items-center text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none hover:border-indigo-300 focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700 mb-2 transition-all cursor-pointer"
+                  aria-expanded={isLocationDropdownOpen}
+                  aria-haspopup="listbox"
+                  aria-label="Select Current Location"
+                  className="w-full flex justify-between items-center text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none hover:border-indigo-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 font-medium text-slate-700 mb-2 transition-all cursor-pointer"
                 >
                   <span className="truncate">{currentLocation || 'Select your location...'}</span>
                   <ChevronDown
@@ -580,9 +583,11 @@ export default function App() {
               {/* Auto-detect button */}
               <button
                 id="gps_detect_btn"
+                aria-label="Detect GPS Location"
+                aria-busy={gpsLoading}
                 onClick={handleDetectLocation}
                 disabled={gpsLoading}
-                className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-xl text-[11.5px] font-bold tracking-wide transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:scale-100 shadow-md shadow-indigo-100 hover:shadow-lg hover:shadow-indigo-200/50"
+                className="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-xl text-[11.5px] font-bold tracking-wide transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:scale-100 shadow-md shadow-indigo-100 hover:shadow-lg hover:shadow-indigo-200/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
               >
                 {gpsLoading ? (
                   <>
@@ -633,7 +638,9 @@ export default function App() {
                       ]);
                     }}
                     title={lang.name}
-                    className={`h-8 w-8 rounded-full flex items-center justify-center text-lg shadow-sm transition-all ${
+                    aria-label={`Change language to ${lang.name}`}
+                    aria-pressed={selectedLanguage === lang.code}
+                    className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 h-8 w-8 rounded-full flex items-center justify-center text-lg shadow-sm transition-all ${
                       selectedLanguage === lang.code
                         ? 'ring-2 ring-indigo-500 bg-indigo-50 scale-110'
                         : 'bg-slate-50 border border-slate-200 hover:scale-110 hover:bg-white cursor-pointer opacity-70 hover:opacity-100'
@@ -779,7 +786,12 @@ export default function App() {
                       <div className="flex justify-end mt-2 pt-2 border-t border-indigo-500/30">
                         <button
                           onClick={() => toggleSpeakMessage(idx, msg.text)}
-                          className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
+                          aria-label={
+                            currentlySpeakingIndex === idx
+                              ? 'Stop speaking text'
+                              : 'Speak text aloud'
+                          }
+                          className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
                             currentlySpeakingIndex === idx
                               ? 'bg-red-500 border-red-400 text-white animate-pulse'
                               : 'bg-indigo-700/50 hover:bg-indigo-700 border-indigo-500 text-indigo-100 hover:text-white'
@@ -812,7 +824,12 @@ export default function App() {
                         </div>
                         <button
                           onClick={() => toggleSpeakMessage(idx, msg.text)}
-                          className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
+                          aria-label={
+                            currentlySpeakingIndex === idx
+                              ? 'Stop speaking text'
+                              : 'Speak text aloud'
+                          }
+                          className={`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 text-[9px] font-semibold px-2 py-0.5 rounded-full border transition-all flex items-center gap-1 cursor-pointer ${
                             currentlySpeakingIndex === idx
                               ? 'bg-red-50 border-red-200 text-red-600 animate-pulse'
                               : 'bg-slate-50 hover:bg-indigo-50 border-slate-200 hover:border-indigo-200 text-slate-500 hover:text-indigo-600'
@@ -880,17 +897,19 @@ export default function App() {
               <input
                 type="text"
                 id="message_text_input"
+                aria-label="Chat message input"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 disabled={isLoadingChat}
                 placeholder="Ask about food, gate wait times, policies, or request translations..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-full py-3.5 pl-6 pr-24 text-xs outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-slate-800 placeholder-slate-400"
+                className="w-full bg-slate-50 border border-slate-200 rounded-full py-3.5 pl-6 pr-24 text-xs outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus:bg-white text-slate-800 placeholder-slate-400"
               />
               <div className="absolute right-2 flex gap-1">
                 <button
                   type="submit"
+                  aria-label="Send message"
                   disabled={!inputMessage.trim() || isLoadingChat}
-                  className="px-5 py-2 bg-indigo-600 text-white text-[10px] font-bold rounded-full hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100 disabled:opacity-40"
+                  className="px-5 py-2 bg-indigo-600 text-white text-[10px] font-bold rounded-full hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                 >
                   SEND
                 </button>

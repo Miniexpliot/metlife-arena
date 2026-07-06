@@ -2,7 +2,10 @@ import React from 'react';
 
 export default function Header() {
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shadow-sm z-10 flex-shrink-0">
+    <header
+      aria-label="Main Application Header"
+      className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shadow-sm z-10 flex-shrink-0"
+    >
       <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
         <div className="w-9 h-9 sm:w-10 sm:h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-md shadow-indigo-100 border border-indigo-500 flex-shrink-0">
           <span className="tracking-tight">W26</span>
