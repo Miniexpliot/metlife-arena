@@ -327,17 +327,28 @@ export default function App() {
 
       const data = await response.json();
       if (!response.ok) {
+        if (response.status === 429 || response.status === 503 || response.status >= 500) {
+          throw new Error("The AI model is currently experiencing extremely high demand. Please wait a few moments and try your request again.");
+        }
         throw new Error(data.details || data.error || "Service error");
       }
 
       setMessages((prev) => [...prev, { role: "model", text: data.reply }]);
     } catch (error: any) {
       console.error("Chat error:", error);
+      
+      let errorMsg = error.message || "Failed to reach stadium servers. Please make sure GEMINI_API_KEY is active in Settings.";
+      
+      // Additional safety catch for Gemini specific overload strings
+      if (errorMsg.toLowerCase().includes("503") || errorMsg.toLowerCase().includes("429") || errorMsg.toLowerCase().includes("quota") || errorMsg.toLowerCase().includes("overloaded")) {
+        errorMsg = "The AI model is currently experiencing extremely high demand. Please wait a few moments and try your request again.";
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: "model",
-          text: `⚠️ **Companion Connection Issue**: ${error.message || "Failed to reach stadium servers. Please make sure GEMINI_API_KEY is active in Settings."}`
+          text: `⚠️ **Companion Connection Issue**: ${errorMsg}`
         }
       ]);
     } finally {
