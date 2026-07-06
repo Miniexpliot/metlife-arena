@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Volume2,
   VolumeX,
-  Info
+  Info,
+  X
 } from "lucide-react";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCOEK_lOpCzZEbLFM-ptfw4nCViJv_NJIQ";
@@ -118,6 +119,7 @@ export default function App() {
   const [rightActiveTab, setRightActiveTab] = useState<"map" | "concessions" | "rules">("map");
   const [mobileTab, setMobileTab] = useState<"controls" | "chat" | "deck">("chat");
   const [showKeyConfig, setShowKeyConfig] = useState<boolean>(false);
+  const [showTip, setShowTip] = useState<boolean>(true);
 
   const [currentlySpeakingIndex, setCurrentlySpeakingIndex] = useState<number | null>(null);
   const [gpsLoading, setGpsLoading] = useState<boolean>(false);
@@ -468,10 +470,10 @@ export default function App() {
       </header>
 
       {/* THREE-COLUMN SLEEK WORKSPACE */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+      <main className="flex-1 overflow-hidden flex relative bg-slate-50">
         
-        {/* LEFT COLUMN: CONTROL & STATUS PANEL */}
-        <aside className={`w-full lg:w-72 bg-white lg:border-r border-slate-200 p-5 flex-col gap-6 overflow-y-auto flex-shrink-0 ${mobileTab === "controls" ? "flex" : "hidden lg:flex"}`}>
+        {/* LEFT COLUMN: CONTROLS */}
+        <aside className={`w-full lg:w-72 bg-white lg:border-r border-slate-200 p-5 flex-col gap-6 overflow-y-auto flex-shrink-0 flex-1 lg:flex-none ${mobileTab === "controls" ? "flex" : "hidden lg:flex"}`}>
           
           {/* Status Label */}
           <div>
@@ -785,7 +787,7 @@ export default function App() {
         </section>
 
         {/* RIGHT COLUMN: INSIGHTS & UTILITY DECK */}
-        <aside className={`w-full lg:w-80 bg-slate-50 lg:border-l border-slate-200 flex-col overflow-hidden flex-shrink-0 ${mobileTab === "deck" ? "flex" : "hidden lg:flex"}`}>
+        <aside className={`w-full lg:w-80 bg-slate-50 lg:border-l border-slate-200 flex-col overflow-hidden flex-shrink-0 flex-1 lg:flex-none ${mobileTab === "deck" ? "flex" : "hidden lg:flex"}`}>
           
           {/* Deck selector headers */}
           <div className="grid grid-cols-3 bg-slate-100 border-b border-slate-200 p-1">
@@ -1088,21 +1090,30 @@ export default function App() {
           </div>
 
           {/* Side Tip Banner */}
-          <div className="p-4 bg-indigo-50 border-t border-slate-200">
-            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-3 flex gap-2.5 mt-4 shadow-sm">
-              <Info size={14} className="text-indigo-500 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-extrabold text-indigo-900 uppercase text-[9px] tracking-wider mb-0.5">SMART COMPANION TIP</p>
-                <p className="text-[10px] text-indigo-800/80 leading-relaxed">
-                  Try asking the AI something like <strong>"Where can I get vegetarian food near my seat?"</strong> or <strong>"How long is the wait at the nearest gate?"</strong> The AI reads your live GPS and the stadium database to give you a perfect, customized answer!
-                </p>
+          {showTip && (
+            <div className="p-4 bg-indigo-50 border-t border-slate-200 relative">
+              <button 
+                onClick={() => setShowTip(false)} 
+                className="absolute top-2 right-2 text-indigo-400 hover:text-indigo-600 transition-colors"
+                aria-label="Dismiss tip"
+              >
+                <X size={14} />
+              </button>
+              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-3 flex gap-2.5 mt-2 shadow-sm">
+                <Info size={14} className="text-indigo-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-extrabold text-indigo-900 uppercase text-[9px] tracking-wider mb-0.5">SMART COMPANION TIP</p>
+                  <p className="text-[10px] text-indigo-800/80 leading-relaxed">
+                    Try asking the AI something like <strong>"Where can I get vegetarian food near my seat?"</strong> or <strong>"How long is the wait at the nearest gate?"</strong> The AI reads your live GPS and the stadium database to give you a perfect, customized answer!
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
         </aside>
 
-      </div>
+      </main>
 
       {/* MOBILE BOTTOM NAVIGATION */}
       <div className="lg:hidden h-14 bg-white border-t border-slate-200 flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
