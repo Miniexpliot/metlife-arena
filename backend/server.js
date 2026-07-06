@@ -4,6 +4,8 @@ import fs from "fs";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 // Get current directory for ES modules
 import { fileURLToPath } from 'url';
@@ -15,8 +17,22 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security: HTTP Headers protection
+app.use(helmet());
 app.use(cors());
-app.use(express.json());
+// Security: Limit body payload size
+app.use(express.json({ limit: "10kb" }));
+
+// Security: Rate limiting to protect Gemini API quota & prevent DoS
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: { error: "Too many requests from this IP, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+// Apply rate limiter to all API routes
+app.use("/api/", apiLimiter);
 
 // Load stadium data database for RAG context
 const stadiumDataPath = path.join(__dirname, "stadium_data.json");
@@ -63,8 +79,15 @@ app.post("/api/chat", async (req, res) => {
   try {
     const { message, history, currentLocation } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ error: "Message is required." });
+    // Security: Strict Input Validation & Sanitization
+    if (!message || typeof message !== "string" || message.length > 500) {
+      return res.status(400).json({ error: "Invalid message payload. Must be a string under 500 characters." });
+    }
+    if (history && (!Array.isArray(history) || history.length > 50)) {
+      return res.status(400).json({ error: "Invalid history payload. Must be an array with max 50 items." });
+    }
+    if (currentLocation && (typeof currentLocation !== "string" || currentLocation.length > 100)) {
+      return res.status(400).json({ error: "Invalid location payload. Must be a string under 100 characters." });
     }
 
     let ai;
