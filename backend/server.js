@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import compression from "compression";
 
 // Get current directory for ES modules
 import { fileURLToPath } from 'url';
@@ -19,6 +20,8 @@ const PORT = process.env.PORT || 3000;
 
 // Security: HTTP Headers protection
 app.use(helmet());
+// Performance: GZIP Compress responses
+app.use(compression());
 // Security: Restrict CORS policy
 app.use(cors({
   origin: process.env.FRONTEND_URL || "*", // Fallback to * if env not set, but restricts on prod
