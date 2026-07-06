@@ -221,11 +221,17 @@ export default function App() {
       setCurrentLocation(uniqueName);
       setGpsLoading(false);
       
+      let messageText = `🎯 **GPS Located!** \n\nWe successfully detected your live location coordinates at **Lat: ${lat.toFixed(5)}**, **Lng: ${lng.toFixed(5)}**.\n\nYour seating zone is resolved as:\n🎟️ **"${uniqueName}"**\n\nThe Smart Companion has calibrated your proximity parameters to guide you to the closest concessions, medical stations, and exits from this point.`;
+      
+      if (uniqueName.includes("Outside Stadium Boundaries")) {
+        messageText = `🌍 **Remote Access Detected** \n\nYour GPS coordinates (**Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}**) indicate that you are outside the stadium grounds.\n\nThe Smart Companion will operate in general assistance mode. Real-time walking directions to concessions and gates will not be grounded to your physical location!`;
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           role: "model",
-          text: `🎯 **GPS Located!** \n\nWe successfully detected your live location coordinates at **Lat: ${lat.toFixed(5)}**, **Lng: ${lng.toFixed(5)}**.\n\nYour seating zone is resolved as:\n🎟️ **"${uniqueName}"**\n\nThe Smart Companion has calibrated your proximity parameters to guide you to the closest concessions, medical stations, and exits from this point.`
+          text: messageText
         }
       ]);
     };
@@ -543,12 +549,12 @@ export default function App() {
                   value={selectedLanguage}
                   onChange={(e) => {
                     setSelectedLanguage(e.target.value);
-                    const langNames: { [key: string]: string } = {
-                      en: "English",
-                      es: "Español",
-                      fr: "Français",
-                      pt: "Português",
-                      ar: "العربية"
+                    const langNames: Record<string, string> = {
+                      en: "🇺🇸 English (US)",
+                      es: "🇪🇸 Español",
+                      fr: "🇫🇷 Français",
+                      pt: "🇧🇷 Português",
+                      ar: "🇸🇦 العربية"
                     };
                     setMessages((prev) => [
                       ...prev,
@@ -560,11 +566,11 @@ export default function App() {
                   }}
                   className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700"
                 >
-                  <option value="en">English (US)</option>
-                  <option value="es">Español (ES)</option>
-                  <option value="fr">Français (FR)</option>
-                  <option value="pt">Português (BR)</option>
-                  <option value="ar">العربية (AR)</option>
+                  <option value="en">🇺🇸 English (US)</option>
+                  <option value="es">🇪🇸 Español</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="pt">🇧🇷 Português</option>
+                  <option value="ar">🇸🇦 العربية</option>
                 </select>
               </div>
             </div>
@@ -581,7 +587,7 @@ export default function App() {
                   <span className={`text-base font-bold ${
                     vitals.density === "High" ? "text-red-600" : vitals.density === "Medium" ? "text-amber-600" : "text-green-600"
                   }`}>{vitals.density}</span>
-                  <span className="text-[10px] text-indigo-600 font-medium pb-0.5 underline cursor-pointer" onClick={() => setRightActiveTab("map")}>Live Map</span>
+                  <span className="text-[10px] text-indigo-600 font-medium pb-0.5 underline cursor-pointer hover:text-indigo-800 transition-colors" onClick={() => { setRightActiveTab("map"); setMobileTab("deck"); }}>Live Map</span>
                 </div>
               </div>
 
@@ -607,17 +613,18 @@ export default function App() {
           </div>
 
           {/* Emergency button */}
-          <div className="mt-auto pt-4 border-t border-slate-100">
-            <button 
-              id="emergency_btn"
-              onClick={() => {
-                handleSendMessage("HELP: What is the emergency medical phone number and where is the nearest first aid Alpha station?");
-              }}
-              className="w-full py-2.5 bg-red-600 text-white rounded-xl font-bold text-xs shadow-md shadow-red-100 hover:bg-red-700 transition-colors flex items-center justify-center gap-1.5"
-            >
-              <AlertCircle size={14} className="animate-pulse" /> Emergency Assistance
-            </button>
-          </div>
+          <div className="mt-auto pt-4">
+              <button 
+                id="emergency_btn"
+                onClick={() => {
+                  setMobileTab("chat");
+                  handleSendMessage("HELP: What is the emergency medical phone number and where is the nearest first aid Alpha station?");
+                }}
+                className="w-full py-2.5 bg-red-600 text-white rounded-xl font-bold text-xs shadow-md shadow-red-100 hover:bg-red-700 transition-colors flex items-center justify-center gap-1.5"
+              >
+                <AlertCircle size={14} className="animate-pulse" /> Emergency Assistance
+              </button>
+            </div>
 
         </aside>
 
@@ -826,13 +833,16 @@ export default function App() {
                 
                 {/* Real Live GPS Google Map */}
                 <div>
-                  <div className="flex justify-between items-center mb-1.5">
+                  <div className="flex justify-between items-center mb-2">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live GPS Satellite Map</label>
-                    {customApiKey ? (
-                      <span className="text-[9px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full font-bold border border-indigo-100">Custom Key Active</span>
-                    ) : (
-                      <span className="text-[9px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-100">Demo Key Active</span>
-                    )}
+                    <a 
+                      href="https://maps.google.com/?q=MetLife+Stadium" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[9px] bg-indigo-600 text-white px-2 py-1 rounded-md font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(79,70,229,0.3)] hover:bg-indigo-500 hover:scale-105 transition-all animate-pulse"
+                    >
+                      Open in Maps ↗️
+                    </a>
                   </div>
                   {!isApiKeyValid ? (
                     <div className="bg-slate-900 text-white rounded-2xl p-4 flex flex-col justify-between border border-slate-800 relative overflow-hidden shadow-inner aspect-square text-left">
