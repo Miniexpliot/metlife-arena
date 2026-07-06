@@ -1,12 +1,12 @@
-import express from "express";
-import path from "path";
-import fs from "fs";
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import compression from "compression";
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import { GoogleGenAI } from '@google/genai';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import compression from 'compression';
 
 // Get current directory for ES modules
 import { fileURLToPath } from 'url';
@@ -23,34 +23,36 @@ app.use(helmet());
 // Performance: GZIP Compress responses
 app.use(compression());
 // Security: Restrict CORS policy
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "*", // Fallback to * if env not set, but restricts on prod
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || '*', // Fallback to * if env not set, but restricts on prod
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 // Security: Limit body payload size
-app.use(express.json({ limit: "10kb" }));
+app.use(express.json({ limit: '10kb' }));
 
 // Security: Rate limiting to protect Gemini API quota & prevent DoS
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per window
-  message: { error: "Too many requests from this IP, please try again later." },
+  message: { error: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
 });
 // Apply rate limiter to all API routes
-app.use("/api/", apiLimiter);
+app.use('/api/', apiLimiter);
 
 // Load stadium data database for RAG context
-const stadiumDataPath = path.join(__dirname, "stadium_data.json");
+const stadiumDataPath = path.join(__dirname, 'stadium_data.json');
 let stadiumData = null;
 try {
-  const fileContent = fs.readFileSync(stadiumDataPath, "utf-8");
+  const fileContent = fs.readFileSync(stadiumDataPath, 'utf-8');
   stadiumData = JSON.parse(fileContent);
-  console.log("Stadium database loaded successfully.");
+  console.log('Stadium database loaded successfully.');
 } catch (error) {
-  console.error("Failed to load stadium database:", error);
+  console.error('Failed to load stadium database:', error);
 }
 
 // Lazy Gemini client initialization
@@ -60,13 +62,13 @@ function getGeminiClient() {
   if (!aiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is missing.");
+      throw new Error('GEMINI_API_KEY environment variable is missing.');
     }
     aiClient = new GoogleGenAI({
       apiKey,
       httpOptions: {
         headers: {
-          "User-Agent": "aistudio-build",
+          'User-Agent': 'aistudio-build',
         },
       },
     });
@@ -75,43 +77,49 @@ function getGeminiClient() {
 }
 
 // 1. API: Get structured stadium database
-app.get("/api/stadium", (req, res) => {
+app.get('/api/stadium', (req, res) => {
   if (!stadiumData) {
-    return res.status(500).json({ error: "Stadium database is not available." });
+    return res.status(500).json({ error: 'Stadium database is not available.' });
   }
   res.json(stadiumData);
 });
 
 // 2. API: Dynamic location-aware chat with Gemini (RAG)
-app.post("/api/chat", async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   try {
     const { message, history, currentLocation } = req.body;
 
     // Security: Strict Input Validation & Sanitization
-    if (!message || typeof message !== "string" || message.length > 500) {
-      return res.status(400).json({ error: "Invalid message payload. Must be a string under 500 characters." });
+    if (!message || typeof message !== 'string' || message.length > 500) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid message payload. Must be a string under 500 characters.' });
     }
     if (history && (!Array.isArray(history) || history.length > 50)) {
-      return res.status(400).json({ error: "Invalid history payload. Must be an array with max 50 items." });
+      return res
+        .status(400)
+        .json({ error: 'Invalid history payload. Must be an array with max 50 items.' });
     }
-    if (currentLocation && (typeof currentLocation !== "string" || currentLocation.length > 100)) {
-      return res.status(400).json({ error: "Invalid location payload. Must be a string under 100 characters." });
+    if (currentLocation && (typeof currentLocation !== 'string' || currentLocation.length > 100)) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid location payload. Must be a string under 100 characters.' });
     }
 
     let ai;
     try {
       ai = getGeminiClient();
     } catch (err) {
-      console.error("Configuration Error:", err.message);
-      return res.status(500).json({ 
-        error: "Configuration Error", 
-        details: "Internal server configuration error." 
+      console.error('Configuration Error:', err.message);
+      return res.status(500).json({
+        error: 'Configuration Error',
+        details: 'Internal server configuration error.',
       });
     }
 
     const systemInstruction = `You are the "Smart Stadium Assistant" - the official AI Guide for fans attending the FIFA World Cup 2026 matches at the arena.
 
-The fan is currently located in the stadium at: **${currentLocation || "Not Selected (General Area)"}**. 
+The fan is currently located in the stadium at: **${currentLocation || 'Not Selected (General Area)'}**. 
 Use this location to give highly personalized, context-aware proximity answers (e.g. recommend amenities/concessions inside or nearest to their Sector).
 
 CRITICAL REFERENCE STADIUM DATABASE (RAG context):
@@ -130,21 +138,21 @@ DIRECTIONS & RULES FOR YOUR RESPONSES:
     if (history && Array.isArray(history)) {
       for (const h of history) {
         contents.push({
-          role: h.role === "user" ? "user" : "model",
+          role: h.role === 'user' ? 'user' : 'model',
           parts: [{ text: h.text }],
         });
       }
     }
-    
+
     contents.push({
-      role: "user",
+      role: 'user',
       parts: [{ text: message }],
     });
 
     console.log(`Sending prompt to Gemini. User location: ${currentLocation}`);
-    
+
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: 'gemini-3.5-flash',
       contents: contents,
       config: {
         systemInstruction: systemInstruction,
@@ -152,25 +160,25 @@ DIRECTIONS & RULES FOR YOUR RESPONSES:
       },
     });
 
-    const replyText = response.text || "I apologize, but I could not formulate a response. Please try again.";
+    const replyText =
+      response.text || 'I apologize, but I could not formulate a response. Please try again.';
     res.json({ reply: replyText });
-
   } catch (error) {
-    console.error("Gemini API Error:", error.message || error);
-    res.status(500).json({ 
-      error: "Gemini Service Error", 
-      details: "An unexpected error occurred while processing your request." 
+    console.error('Gemini API Error:', error.message || error);
+    res.status(500).json({
+      error: 'Gemini Service Error',
+      details: 'An unexpected error occurred while processing your request.',
     });
   }
 });
 
 // Basic health check for Render
-app.get("/", (req, res) => {
-  res.send("Backend API is running.");
+app.get('/', (req, res) => {
+  res.send('Backend API is running.');
 });
 
-if (process.env.NODE_ENV !== "test") {
-  app.listen(PORT, "0.0.0.0", () => {
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Backend server running on http://0.0.0.0:${PORT}`);
   });
 }

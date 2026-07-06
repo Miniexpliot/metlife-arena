@@ -9,11 +9,11 @@ vi.mock('@google/genai', () => {
       constructor() {
         this.models = {
           generateContent: vi.fn().mockResolvedValue({
-            text: "Mocked AI Response"
-          })
+            text: 'Mocked AI Response',
+          }),
         };
       }
-    }
+    },
   };
 });
 
@@ -22,7 +22,6 @@ process.env.GEMINI_API_KEY = 'fake_key_for_testing';
 process.env.NODE_ENV = 'test';
 
 describe('Backend API Tests', () => {
-  
   it('GET / should return 200 health check', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
@@ -37,31 +36,24 @@ describe('Backend API Tests', () => {
   });
 
   it('POST /api/chat should return 400 if message is missing', async () => {
-    const res = await request(app)
-      .post('/api/chat')
-      .send({ history: [] }); // No message
+    const res = await request(app).post('/api/chat').send({ history: [] }); // No message
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('Invalid message payload');
   });
 
   it('POST /api/chat should return 400 if message is too long (Security Check)', async () => {
     const longMessage = 'A'.repeat(600); // 600 chars, limit is 500
-    const res = await request(app)
-      .post('/api/chat')
-      .send({ message: longMessage });
+    const res = await request(app).post('/api/chat').send({ message: longMessage });
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('Invalid message payload');
   });
 
   it('POST /api/chat should return 200 and mocked response for valid payload', async () => {
-    const res = await request(app)
-      .post('/api/chat')
-      .send({ 
-        message: 'Where is the nearest restroom?',
-        currentLocation: 'Section 100-Level (Lower Bowl)'
-      });
+    const res = await request(app).post('/api/chat').send({
+      message: 'Where is the nearest restroom?',
+      currentLocation: 'Section 100-Level (Lower Bowl)',
+    });
     expect(res.status).toBe(200);
     expect(res.body.reply).toBe('Mocked AI Response');
   });
-
 });

@@ -8,12 +8,11 @@ vi.mock('@vis.gl/react-google-maps', () => {
     APIProvider: ({ children }: any) => <div>{children}</div>,
     Map: () => <div data-testid="google-map-mock">Map Mock</div>,
     AdvancedMarker: ({ children }: any) => <div>{children}</div>,
-    Pin: () => <div>Pin</div>
+    Pin: () => <div>Pin</div>,
   };
 });
 
 describe('App Component', () => {
-  
   it('renders the application header', () => {
     render(<App />);
     expect(screen.getAllByText(/MetLife Stadium/i).length).toBeGreaterThan(0);
@@ -26,7 +25,9 @@ describe('App Component', () => {
 
   it('allows user to type a message in the input field', () => {
     render(<App />);
-    const inputElement = screen.getByPlaceholderText(/Ask about food, gate wait times/i) as HTMLInputElement;
+    const inputElement = screen.getByPlaceholderText(
+      /Ask about food, gate wait times/i
+    ) as HTMLInputElement;
     fireEvent.change(inputElement, { target: { value: 'Where is the nearest hot dog?' } });
     expect(inputElement.value).toBe('Where is the nearest hot dog?');
   });
@@ -43,7 +44,7 @@ describe('App Component', () => {
     const { container } = render(<App />);
     const tipHeader = screen.getByText(/SMART COMPANION TIP/i);
     expect(tipHeader).toBeInTheDocument();
-    
+
     // Find the tip container
     const tipContainer = tipHeader.closest('.bg-indigo-50');
     if (tipContainer) {
@@ -52,8 +53,7 @@ describe('App Component', () => {
         fireEvent.click(closeButton);
       }
     }
-    
+
     expect(screen.queryByText(/SMART COMPANION TIP/i)).not.toBeInTheDocument();
   });
-
 });

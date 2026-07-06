@@ -18,7 +18,7 @@ global.fetch = vi.fn().mockImplementation((url) => {
   if (url === '/api/stadium') {
     return Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({ stadium_name: 'Mock Stadium' })
+      json: () => Promise.resolve({ stadium_name: 'Mock Stadium' }),
     });
   }
   return Promise.reject(new Error('Unknown URL'));
