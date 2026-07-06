@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCOEK_lOpCzZEbLFM-ptfw4nCViJv_NJIQ";
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || "";
 
 
 interface Restroom {
@@ -228,7 +229,7 @@ export default function App() {
 
   // Fetch Stadium database on mount
   useEffect(() => {
-    fetch("/api/stadium")
+    fetch(`${API_BASE_URL}/api/stadium`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load stadium data");
         return res.json();
@@ -260,7 +261,7 @@ export default function App() {
         ? `${currentLocation} (Exact GPS Coordinates - Latitude: ${detectedCoords.lat.toFixed(6)}, Longitude: ${detectedCoords.lng.toFixed(6)})`
         : `${currentLocation}`;
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
