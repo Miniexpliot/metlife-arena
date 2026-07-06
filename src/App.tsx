@@ -20,7 +20,8 @@ import {
   ChevronRight,
   TrendingUp,
   Volume2,
-  VolumeX
+  VolumeX,
+  Info
 } from "lucide-react";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCOEK_lOpCzZEbLFM-ptfw4nCViJv_NJIQ";
@@ -168,6 +169,16 @@ export default function App() {
   };
 
   const generateUniqueLocationName = (lat: number, lon: number) => {
+    // MetLife Stadium coordinates
+    const stadiumLat = 40.8135;
+    const stadiumLng = -74.0744;
+    
+    // Check approximate distance (0.05 degrees is roughly 3-5 miles)
+    const distance = Math.sqrt(Math.pow(lat - stadiumLat, 2) + Math.pow(lon - stadiumLng, 2));
+    if (distance > 0.05) {
+      return "Outside Stadium Boundaries (Remote Access)";
+    }
+
     const sections = ["Section 104", "Section 112", "Section 124", "Section 143", "Section 201", "Section 224", "Section 248", "Section 301", "Section 315", "Section 340", "Club Level 12", "Mezzanine Suite 4"];
     const seats = ["Row 4, Seat 18", "Row 12, Seat 5", "Row 15, Seat 22", "Row 20, Seat 1", "Row 28, Seat 14", "Wheelchair Bay 3", "Standing Zone A"];
     
@@ -211,21 +222,27 @@ export default function App() {
           triggerLocationFound(lat, lng);
         },
         (error) => {
-          console.warn("Geolocation permission denied, simulating coordinates...", error);
-          const simulatedLat = 40.8135 + (Math.random() - 0.5) * 0.005;
-          const simulatedLng = -74.0744 + (Math.random() - 0.5) * 0.005;
-          setTimeout(() => {
-            triggerLocationFound(simulatedLat, simulatedLng);
-          }, 1200);
+          console.warn("Geolocation permission denied.", error);
+          setGpsLoading(false);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "model",
+              text: "⚠️ **GPS Access Denied**\n\nPlease enable location services or manually select your seating zone from the dropdown menu above."
+            }
+          ]);
         },
-        { enableHighAccuracy: true, timeout: 5000 }
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
-      const simulatedLat = 40.8135 + (Math.random() - 0.5) * 0.005;
-      const simulatedLng = -74.0744 + (Math.random() - 0.5) * 0.005;
-      setTimeout(() => {
-        triggerLocationFound(simulatedLat, simulatedLng);
-      }, 1200);
+      setGpsLoading(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "model",
+          text: "⚠️ **GPS Not Supported**\n\nYour browser does not support geolocation. Please manually select your seating zone."
+        }
+      ]);
     }
   };
 
@@ -317,22 +334,39 @@ export default function App() {
   }
   const allLocationOptions = [...customDetectedLocations, ...gateOptions];
 
-  // Derive vitals for selected location dynamically
   const getSelectedLocationVitals = () => {
-    if (!stadiumData) return { waitTime: "12 Min", density: "Medium", flow: "Normal Flow" };
+    if (!stadiumData) return { waitTime: "--", density: "Unknown", flow: "Unknown" };
     
-    // Parse gate from currentLocation selection, e.g. "Sector 1 - Gate A" -> "Gate A"
-    const gatePart = currentLocation.split(" - ")[1] || "Gate A";
-    const gateInfo = stadiumData.gate_status[gatePart];
+    if (currentLocation.includes("Outside Stadium Boundaries")) {
+      return { waitTime: "N/A", density: "Remote", flow: "Not Applicable" };
+    }
     
-    if (gateInfo) {
+    const gatePart = currentLocation.split(" - ")[1];
+    if (gatePart && stadiumData.gate_status[gatePart]) {
+      const gateInfo = stadiumData.gate_status[gatePart];
       return {
         waitTime: `${gateInfo.security_wait_minutes} Min`,
         density: gateInfo.crowd_density,
         flow: gateInfo.security_wait_minutes > 30 ? "Heavy Bottleneck" : gateInfo.security_wait_minutes > 15 ? "Moderate Flow" : "Normal Flow"
       };
     }
-    return { waitTime: "12 Min", density: "Medium", flow: "Normal Flow" };
+
+    // If user is at a seat or unmapped zone, calculate the stadium average
+    let totalWait = 0;
+    let gateCount = 0;
+    Object.values(stadiumData.gate_status).forEach((g: any) => {
+      if (g.security_wait_minutes) {
+        totalWait += g.security_wait_minutes;
+        gateCount++;
+      }
+    });
+    const avgWait = gateCount > 0 ? Math.round(totalWait / gateCount) : 15;
+
+    return { 
+      waitTime: `~${avgWait} Min (Avg)`, 
+      density: "Moderate", 
+      flow: "Zone Average" 
+    };
   };
 
   const vitals = getSelectedLocationVitals();
@@ -963,30 +997,41 @@ export default function App() {
                       </div>
 
                       {sector.concessions.map((stall, i) => (
-                        <div key={i} className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm text-xs">
-                          <div className="flex justify-between font-bold text-slate-800">
-                            <span>{stall.name}</span>
-                            <span className="text-[10px] text-indigo-600 font-mono">{stall.wait_time_minutes}m wait</span>
-                          </div>
-                          <p className="text-[9px] text-slate-400 mb-1.5">📍 {stall.location} | Cuisine: {stall.cuisine}</p>
-                          
-                          <div className="flex flex-wrap gap-1 mb-1">
-                            {stall.menu.slice(0, 3).map((item, mIdx) => (
-                              <span key={mIdx} className="bg-slate-50 border border-slate-100 text-slate-600 text-[9px] px-1 rounded font-mono">
-                                {item}
+                        <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 shadow-md text-xs hover:border-indigo-300 transition-colors">
+                          <div className="flex justify-between items-start mb-1">
+                            <div>
+                              <span className="font-extrabold text-slate-800 text-sm flex items-center gap-1.5">
+                                🍔 {stall.name}
                               </span>
-                            ))}
+                              <p className="text-[10px] text-slate-500 font-medium mt-0.5">📍 {stall.location}</p>
+                            </div>
+                            <span className="bg-indigo-50 text-indigo-700 px-2 py-1 rounded-md text-[10px] font-bold border border-indigo-100 shadow-sm flex items-center gap-1">
+                              ⏳ {stall.wait_time_minutes}m
+                            </span>
+                          </div>
+                          
+                          <p className="text-[10px] text-slate-500 mb-2 italic">Cuisine: {stall.cuisine}</p>
+                          
+                          <div className="bg-slate-50 rounded-lg p-2 mb-2 border border-slate-100">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Menu Highlights</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {stall.menu.map((item, mIdx) => (
+                                <span key={mIdx} className="bg-white border border-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-md shadow-sm">
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
                           </div>
 
-                          <div className="flex gap-1 pt-1 border-t border-slate-100">
+                          <div className="flex gap-1.5 pt-1">
                             {stall.vegetarian_options.length > 0 && (
-                              <span className="text-[8px] text-green-700 bg-green-50 font-bold px-1 rounded">VEG</span>
+                              <span className="text-[9px] text-green-700 bg-green-50 border border-green-200 font-bold px-1.5 py-0.5 rounded-md">🌱 VEG</span>
                             )}
                             {stall.vegan_options.length > 0 && (
-                              <span className="text-[8px] text-emerald-700 bg-emerald-50 font-bold px-1 rounded">VEGAN</span>
+                              <span className="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 font-bold px-1.5 py-0.5 rounded-md">🍃 VEGAN</span>
                             )}
                             {stall.gluten_free_options.length > 0 && (
-                              <span className="text-[8px] text-blue-700 bg-blue-50 font-bold px-1 rounded">GF</span>
+                              <span className="text-[9px] text-blue-700 bg-blue-50 border border-blue-200 font-bold px-1.5 py-0.5 rounded-md">🌾 GF</span>
                             )}
                           </div>
                         </div>
@@ -1030,12 +1075,12 @@ export default function App() {
 
           {/* Side Tip Banner */}
           <div className="p-4 bg-indigo-50 border-t border-slate-200">
-            <div className="flex gap-2 text-xs">
-              <Compass size={16} className="text-indigo-600 shrink-0 mt-0.5 animate-spin-slow" />
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-3 flex gap-2.5 mt-4 shadow-sm">
+              <Info size={14} className="text-indigo-500 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-indigo-900 uppercase text-[9px] tracking-wider">RAG PRO TIP</p>
-                <p className="text-indigo-950 text-[11px] leading-snug mt-0.5">
-                  The AI knows exactly where you are seated. Just ask "Where is the closest exit?" for step-by-step route directions.
+                <p className="font-extrabold text-indigo-900 uppercase text-[9px] tracking-wider mb-0.5">SMART COMPANION TIP</p>
+                <p className="text-[10px] text-indigo-800/80 leading-relaxed">
+                  Try asking the AI something like <strong>"Where can I get vegetarian food near my seat?"</strong> or <strong>"How long is the wait at the nearest gate?"</strong> The AI reads your live GPS and the stadium database to give you a perfect, customized answer!
                 </p>
               </div>
             </div>
