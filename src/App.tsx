@@ -442,7 +442,7 @@ export default function App() {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap xs:flex-nowrap">
-              <h1 className="text-sm sm:text-base font-bold text-slate-800 leading-none truncate">Smart Stadium Companion</h1>
+              <h1 className="text-lg sm:text-xl font-extrabold text-slate-800 leading-none truncate">MetLife Arena</h1>
               <span className="bg-amber-50 text-amber-700 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded border border-amber-200 uppercase tracking-wide whitespace-nowrap">Official Guest Assistant</span>
             </div>
             <p className="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5 sm:mt-1 truncate">FIFA World Cup 2026 • Live Matchday Updates</p>
