@@ -22,7 +22,8 @@ import {
   Volume2,
   VolumeX,
   Info,
-  X
+  X,
+  ChevronDown
 } from "lucide-react";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCOEK_lOpCzZEbLFM-ptfw4nCViJv_NJIQ";
@@ -120,6 +121,7 @@ export default function App() {
   const [mobileTab, setMobileTab] = useState<"controls" | "chat" | "deck">("chat");
   const [showKeyConfig, setShowKeyConfig] = useState<boolean>(false);
   const [showTip, setShowTip] = useState<boolean>(true);
+  const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState<boolean>(false);
 
   const [currentlySpeakingIndex, setCurrentlySpeakingIndex] = useState<number | null>(null);
   const [gpsLoading, setGpsLoading] = useState<boolean>(false);
@@ -497,30 +499,50 @@ export default function App() {
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Your Status</label>
             <div className="space-y-4">
               
-              {/* Dynamic location select dropdown */}
-              <div>
+              {/* Custom Animated Location Dropdown */}
+              <div className="relative">
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
                   <MapPin size={14} className="text-indigo-600" /> Current Location
                 </label>
-                <select 
-                  id="current_loc_select"
-                  value={currentLocation}
-                  onChange={(e) => {
-                    setCurrentLocation(e.target.value);
-                    setMessages((prev) => [
-                      ...prev,
-                      {
-                        role: "model",
-                        text: `📍 GPS relocated to **${e.target.value}**. Sector-grounded concessions, medical aid, and gate routes are now prioritized for you.`
-                      }
-                    ]);
-                  }}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700 mb-2"
+                <button 
+                  onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
+                  className="w-full flex justify-between items-center text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none hover:border-indigo-300 focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700 mb-2 transition-all cursor-pointer"
                 >
-                  {allLocationOptions.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
+                  <span className="truncate">{currentLocation || "Select your location..."}</span>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform ${isLocationDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                <AnimatePresence>
+                  {isLocationDropdownOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="absolute top-full left-0 right-0 z-50 bg-white border border-slate-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-y-auto"
+                    >
+                      {allLocationOptions.map((opt) => (
+                        <div 
+                          key={opt}
+                          onClick={() => {
+                            setCurrentLocation(opt);
+                            setIsLocationDropdownOpen(false);
+                            setMessages((prev) => [
+                              ...prev,
+                              {
+                                role: "model",
+                                text: `📍 GPS relocated to **${opt}**. Sector-grounded concessions, medical aid, and gate routes are now prioritized for you.`
+                              }
+                            ]);
+                          }}
+                          className={`px-3 py-2 text-xs cursor-pointer hover:bg-indigo-50 transition-colors ${currentLocation === opt ? 'bg-indigo-50/50 text-indigo-700 font-bold' : 'text-slate-700'}`}
+                        >
+                          {opt}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
                 {/* Auto-detect button */}
                 <button
@@ -550,42 +572,44 @@ export default function App() {
                 <p className="text-[9px] text-slate-400 mt-1 italic">Guides the AI Assistant to recommend closest points of interest</p>
               </div>
 
-              {/* Language Selection Select */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
-                  <Globe size={14} className="text-indigo-600" /> Preferred Language
+              {/* Language Settings (Flags) */}
+              <div className="pt-2 border-t border-slate-100">
+                <label className="block text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1">
+                  <Globe size={14} className="text-indigo-600" /> Assistant Language
                 </label>
-                <select 
-                  id="language_select"
-                  value={selectedLanguage}
-                  onChange={(e) => {
-                    setSelectedLanguage(e.target.value);
-                    const langNames: Record<string, string> = {
-                      en: "🇺🇸 English (US)",
-                      es: "🇪🇸 Español",
-                      fr: "🇫🇷 Français",
-                      pt: "🇧🇷 Português",
-                      ar: "🇸🇦 العربية"
-                    };
-                    setMessages((prev) => [
-                      ...prev,
-                      {
-                        role: "model",
-                        text: `🌐 Language preference switched to **${langNames[e.target.value] || e.target.value}**. Your future AI queries will adapt translations automatically.`
-                      }
-                    ]);
-                  }}
-                  className="w-full text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 font-medium text-slate-700"
-                >
-                  <option value="en">🇺🇸 English (US)</option>
-                  <option value="es">🇪🇸 Español</option>
-                  <option value="fr">🇫🇷 Français</option>
-                  <option value="pt">🇧🇷 Português</option>
-                  <option value="ar">🇸🇦 العربية</option>
-                </select>
+                <div className="flex gap-2.5">
+                  {[
+                    { code: "en", flag: "🇺🇸", name: "English (US)" },
+                    { code: "es", flag: "🇪🇸", name: "Español" },
+                    { code: "fr", flag: "🇫🇷", name: "Français" },
+                    { code: "pt", flag: "🇧🇷", name: "Português" },
+                    { code: "ar", flag: "🇸🇦", name: "العربية" }
+                  ].map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        setSelectedLanguage(lang.code);
+                        setMessages((prev) => [
+                          ...prev,
+                          {
+                            role: "model",
+                            text: `🌐 Language preference switched to **${lang.name}**. Your future AI queries will adapt translations automatically.`
+                          }
+                        ]);
+                      }}
+                      title={lang.name}
+                      className={`h-8 w-8 rounded-full flex items-center justify-center text-lg shadow-sm transition-all ${
+                        selectedLanguage === lang.code 
+                          ? "ring-2 ring-indigo-500 bg-indigo-50 scale-110" 
+                          : "bg-slate-50 border border-slate-200 hover:scale-110 hover:bg-white cursor-pointer opacity-70 hover:opacity-100"
+                      }`}
+                    >
+                      {lang.flag}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
           {/* Vitals Panel */}
           <div>

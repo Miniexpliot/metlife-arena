@@ -1,207 +1,162 @@
 {
-  "stadium_name": "FIFA World Cup 2026 Arena",
+  "stadium_name": "MetLife Stadium",
   "sectors": [
     {
-      "id": "Sector 1",
-      "description": "North Stand, highly active fan zone",
-      "gates": ["Gate A", "Gate B"],
+      "id": "100-Level (Lower Bowl)",
+      "description": "Closest to the pitch, highly active fan zones",
+      "gates": ["MetLife Gate", "Verizon Gate"],
       "amenities": [
         {
           "name": "First Aid Station Alpha",
           "type": "medical",
-          "location": "Near Gate A",
+          "location": "Near MetLife Gate",
           "status": "Open",
           "details": "Full medical staff, defibrillators, wheelchair assistance."
-        },
-        {
-          "name": "Information & Lost & Found",
-          "type": "service",
-          "location": "Near Gate B",
-          "status": "Open",
-          "details": "Assistance with ticketing, lost items, and transport guides."
-        },
-        {
-          "name": "Zero-Waste Sorting Hub",
-          "type": "sustainability",
-          "location": "Central Concourse",
-          "status": "Open",
-          "details": "Compost and recycling bins, plus eco-volunteers to help sort waste."
         }
       ],
       "concessions": [
         {
-          "name": "Goal Line Grill",
-          "location": "Near Gate A",
-          "cuisine": "American/Classic",
-          "menu": ["Burgers ($12)", "Fries ($6)", "Hot Dogs ($8)", "Soft Drinks ($5)"],
-          "vegetarian_options": ["Fries"],
+          "name": "Boardwalk Fryer",
+          "location": "Section 108",
+          "cuisine": "American",
+          "menu": ["Chicken Tenders ($12)", "Boardwalk Fries ($7)", "Soda ($5)"],
+          "vegetarian_options": ["Boardwalk Fries"],
           "vegan_options": [],
-          "gluten_free_options": ["Fries"],
+          "gluten_free_options": ["Boardwalk Fries"],
+          "wait_time_minutes": 8,
+          "crowd_status": "Moderate"
+        },
+        {
+          "name": "Bubba Burger",
+          "location": "Section 123",
+          "cuisine": "American",
+          "menu": ["Double Bubba Burger ($14)", "Veggie Burger ($12)", "Fries ($6)"],
+          "vegetarian_options": ["Veggie Burger", "Fries"],
+          "vegan_options": ["Fries"],
+          "gluten_free_options": ["Veggie Burger (No Bun)", "Fries"],
+          "wait_time_minutes": 15,
+          "crowd_status": "High"
+        }
+      ],
+      "restrooms": [
+        {
+          "name": "Restroom Block 110",
+          "location": "Behind Section 110",
+          "types": ["Male", "Female", "Accessible"],
+          "wait_time_minutes": 5,
+          "crowd_status": "Low"
+        }
+      ]
+    },
+    {
+      "id": "200-Level (Mezzanine & Clubs)",
+      "description": "Premium seating, suites, and club access",
+      "gates": ["HCLTech Gate"],
+      "amenities": [
+        {
+          "name": "Information & Concierge",
+          "type": "service",
+          "location": "Club Level Lobby",
+          "status": "Open",
+          "details": "Suite access issues and VIP transport guides."
+        }
+      ],
+      "concessions": [
+        {
+          "name": "Liberty Sausage",
+          "location": "Section 218",
+          "cuisine": "Italian-American",
+          "menu": ["Italian Sausage & Peppers ($13)", "Hot Dog ($8)", "Pretzel ($6)"],
+          "vegetarian_options": ["Pretzel"],
+          "vegan_options": [],
+          "gluten_free_options": [],
+          "wait_time_minutes": 5,
+          "crowd_status": "Low"
+        },
+        {
+          "name": "Nonna Fusco's Meatballs",
+          "location": "Section 234",
+          "cuisine": "Italian",
+          "menu": ["Meatball Hero ($14)", "Garlic Knots ($6)", "Caesar Salad ($10)"],
+          "vegetarian_options": ["Garlic Knots", "Caesar Salad"],
+          "vegan_options": [],
+          "gluten_free_options": ["Caesar Salad (No Croutons)"],
           "wait_time_minutes": 10,
           "crowd_status": "Moderate"
         }
       ],
       "restrooms": [
         {
-          "name": "Restroom Block 1A",
-          "location": "Opposite Gate B",
-          "types": ["Male", "Female", "Accessible"],
-          "wait_time_minutes": 4,
+          "name": "Restroom Block 220",
+          "location": "Club Level Hallway",
+          "types": ["Female", "Accessible", "Family"],
+          "wait_time_minutes": 2,
           "crowd_status": "Low"
         }
       ]
     },
     {
-      "id": "Sector 2",
-      "description": "East Stand, family-friendly seating & VIP hospitality",
-      "gates": ["Gate C", "Gate D"],
-      "amenities": [
-        {
-          "name": "Official FIFA Merchandise Megastore",
-          "type": "shop",
-          "location": "Near Gate C",
-          "status": "Open",
-          "details": "Official match jerseys, balls, scarves, and souvenirs."
-        },
-        {
-          "name": "Eco-Hydration Refill Station",
-          "type": "sustainability",
-          "location": "Outside Section 204",
-          "status": "Open",
-          "details": "Free filtered water for reusable bottles to reduce plastic waste."
-        }
-      ],
-      "concessions": [
-        {
-          "name": "Taco Corner",
-          "location": "Near Gate C",
-          "cuisine": "Mexican",
-          "menu": ["Beef Tacos ($11)", "Bean & Cheese Quesadillas ($9)", "Loaded Nachos ($10)"],
-          "vegetarian_options": ["Bean & Cheese Quesadillas", "Loaded Nachos"],
-          "vegan_options": [],
-          "gluten_free_options": ["Beef Tacos", "Loaded Nachos"],
-          "wait_time_minutes": 15,
-          "crowd_status": "High"
-        },
-        {
-          "name": "Green Pitch Salads & Wraps",
-          "location": "Near Gate D",
-          "cuisine": "Healthy/Vegan",
-          "menu": ["Garden Salad ($10)", "Avocado Hummus Wrap ($11)", "Fresh Juices ($7)", "Fruit Bowls ($6)"],
-          "vegetarian_options": ["Garden Salad", "Avocado Hummus Wrap", "Fresh Juices", "Fruit Bowls"],
-          "vegan_options": ["Garden Salad (without dressing)", "Avocado Hummus Wrap", "Fresh Juices", "Fruit Bowls"],
-          "gluten_free_options": ["Garden Salad", "Fruit Bowls"],
-          "wait_time_minutes": 5,
-          "crowd_status": "Low"
-        }
-      ],
-      "restrooms": [
-        {
-          "name": "Restroom Block 2A",
-          "location": "Near Gate C",
-          "types": ["Female", "Accessible"],
-          "wait_time_minutes": 12,
-          "crowd_status": "High"
-        },
-        {
-          "name": "Restroom Block 2B",
-          "location": "Near Gate D",
-          "types": ["Male", "Female", "Accessible", "Family"],
-          "wait_time_minutes": 3,
-          "crowd_status": "Low"
-        }
-      ]
-    },
-    {
-      "id": "Sector 3",
-      "description": "South Stand, supporter stands and drum core",
-      "gates": ["Gate E", "Gate F"],
+      "id": "300-Level (Upper Deck)",
+      "description": "Panoramic stadium views, passionate supporter sections",
+      "gates": ["Pepsi Gate", "Bud Light Gate"],
       "amenities": [
         {
           "name": "First Aid Station Beta",
           "type": "medical",
-          "location": "Near Gate F",
+          "location": "Near Pepsi Gate",
           "status": "Open",
-          "details": "Minor injury treatment, heat hydration packets."
+          "details": "Minor injury treatment, hydration packets."
         }
       ],
       "concessions": [
         {
-          "name": "Championship Curries",
-          "location": "Near Gate E",
-          "cuisine": "Indian",
-          "menu": ["Butter Chicken with Rice ($14)", "Chickpea Curry & Samosas ($12)", "Mango Lassi ($6)"],
-          "vegetarian_options": ["Chickpea Curry & Samosas", "Mango Lassi"],
-          "vegan_options": ["Chickpea Curry"],
-          "gluten_free_options": ["Butter Chicken with Rice", "Chickpea Curry"],
+          "name": "Taco's Raices",
+          "location": "Section 312",
+          "cuisine": "Mexican",
+          "menu": ["Beef Tacos ($11)", "Nachos ($9)", "Churros ($5)"],
+          "vegetarian_options": ["Nachos", "Churros"],
+          "vegan_options": [],
+          "gluten_free_options": ["Beef Tacos (Corn Tortilla)"],
+          "wait_time_minutes": 20,
+          "crowd_status": "High"
+        },
+        {
+          "name": "Thumann's Hot Dogs",
+          "location": "Section 340",
+          "cuisine": "American",
+          "menu": ["Footlong Dog ($9)", "Chili Cheese Dog ($11)", "Chips ($4)"],
+          "vegetarian_options": ["Chips"],
+          "vegan_options": ["Chips"],
+          "gluten_free_options": ["Chips"],
           "wait_time_minutes": 8,
           "crowd_status": "Moderate"
         }
       ],
       "restrooms": [
         {
-          "name": "Restroom Block 3A",
-          "location": "Between Gates E & F",
-          "types": ["Male", "Female", "Accessible", "Family"],
+          "name": "Restroom Block 315",
+          "location": "Between 314 & 316",
+          "types": ["Male", "Female", "Accessible"],
           "wait_time_minutes": 15,
           "crowd_status": "High"
-        }
-      ]
-    },
-    {
-      "id": "Sector 4",
-      "description": "West Stand, press box, media center & premium boxes",
-      "gates": ["Gate G", "Gate H"],
-      "amenities": [
-        {
-          "name": "Official Merchandise Express Stall",
-          "type": "shop",
-          "location": "Near Gate H",
-          "status": "Open",
-          "details": "Quick-purchase matchday scarves, caps, and programs."
-        }
-      ],
-      "concessions": [
-        {
-          "name": "El Tri Flavors",
-          "location": "Near Gate H",
-          "cuisine": "Mexican/Fusion",
-          "menu": ["Carnitas Burritos ($12)", "Churros ($5)", "Elote Street Corn ($6)"],
-          "vegetarian_options": ["Churros", "Elote Street Corn"],
-          "vegan_options": [],
-          "gluten_free_options": ["Elote Street Corn"],
-          "wait_time_minutes": 12,
-          "crowd_status": "Moderate"
-        }
-      ],
-      "restrooms": [
-        {
-          "name": "Restroom Block 4A",
-          "location": "Near Gate G",
-          "types": ["Male", "Female", "Accessible"],
-          "wait_time_minutes": 3,
-          "crowd_status": "Low"
         }
       ]
     }
   ],
   "gate_status": {
-    "Gate A": { "status": "Open", "security_wait_minutes": 15, "crowd_density": "Medium" },
-    "Gate B": { "status": "Open", "security_wait_minutes": 35, "crowd_density": "High" },
-    "Gate C": { "status": "Open - VIP/Hospitality Only", "security_wait_minutes": 5, "crowd_density": "Low" },
-    "Gate D": { "status": "Open", "security_wait_minutes": 10, "crowd_density": "Low" },
-    "Gate E": { "status": "Open", "security_wait_minutes": 40, "crowd_density": "High" },
-    "Gate F": { "status": "Open", "security_wait_minutes": 20, "crowd_density": "Medium" },
-    "Gate G": { "status": "Open - Media & Staff Only", "security_wait_minutes": 2, "crowd_density": "Low" },
-    "Gate H": { "status": "Open", "security_wait_minutes": 12, "crowd_density": "Medium" }
+    "MetLife Gate": { "status": "Open", "security_wait_minutes": 12, "crowd_density": "Medium" },
+    "Verizon Gate": { "status": "Open", "security_wait_minutes": 25, "crowd_density": "High" },
+    "Pepsi Gate": { "status": "Open", "security_wait_minutes": 5, "crowd_density": "Low" },
+    "HCLTech Gate": { "status": "Open - VIP/Hospitality Only", "security_wait_minutes": 3, "crowd_density": "Low" },
+    "Bud Light Gate": { "status": "Open", "security_wait_minutes": 18, "crowd_density": "Medium" }
   },
   "emergency_info": {
-    "emergency_number": "Steward Dispatch/Medical: Dial +1 (555) 911-2026",
-    "evacuation_assembly_points": "Assembly Point North (Parking Lot A), Assembly Point South (Parking Lot F)",
+    "emergency_number": "MetLife Operations: Dial +1 (555) 911-2026",
+    "evacuation_assembly_points": "Lot E, Lot G, Lot L",
     "rules": [
-      "No bags larger than 12x6x12 inches (must be clear plastic).",
-      "Listen to stadium public address announcements.",
-      "Identify the nearest glowing green 'Exit' sign from your sector."
+      "Clear bag policy is strictly enforced. Bags must be clear plastic, vinyl or PVC and not exceed 12\" x 6\" x 12\".",
+      "No umbrellas, professional cameras, or outside alcoholic beverages.",
+      "Identify the nearest exit sign illuminated above the concourse portals."
     ]
   }
 }
