@@ -19,6 +19,13 @@
           "location": "Near Gate B",
           "status": "Open",
           "details": "Assistance with ticketing, lost items, and transport guides."
+        },
+        {
+          "name": "Zero-Waste Sorting Hub",
+          "type": "sustainability",
+          "location": "Central Concourse",
+          "status": "Open",
+          "details": "Compost and recycling bins, plus eco-volunteers to help sort waste."
         }
       ],
       "concessions": [
@@ -55,6 +62,13 @@
           "location": "Near Gate C",
           "status": "Open",
           "details": "Official match jerseys, balls, scarves, and souvenirs."
+        },
+        {
+          "name": "Eco-Hydration Refill Station",
+          "type": "sustainability",
+          "location": "Outside Section 204",
+          "status": "Open",
+          "details": "Free filtered water for reusable bottles to reduce plastic waste."
         }
       ],
       "concessions": [

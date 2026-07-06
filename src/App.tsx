@@ -231,6 +231,10 @@ export default function App() {
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/stadium`)
       .then((res) => {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+          throw new Error("API Connection Error: Vercel is returning HTML. Ensure VITE_API_URL is configured.");
+        }
         if (!res.ok) throw new Error("Failed to load stadium data");
         return res.json();
       })
@@ -272,6 +276,11 @@ export default function App() {
           currentLocation: `${locationContext} (Language Preferred: ${selectedLanguage})`
         }),
       });
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("text/html")) {
+        throw new Error("⚠️ API Connection Error: Vercel is returning HTML instead of JSON. Ensure VITE_API_URL is set in Vercel settings and that you have Redeployed.");
+      }
 
       const data = await response.json();
       if (!response.ok) {
