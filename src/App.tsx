@@ -231,10 +231,11 @@ export default function App() {
   // Fetch Stadium database on mount
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/stadium`)
-      .then((res) => {
+      .then(async (res) => {
         const contentType = res.headers.get("content-type");
         if (contentType && contentType.includes("text/html")) {
-          throw new Error("API Connection Error: Vercel is returning HTML. Ensure VITE_API_URL is configured.");
+          const htmlPreview = (await res.text()).substring(0, 150);
+          throw new Error(`API Connection Error: Received HTML. API_BASE is '${API_BASE_URL}'. HTML: ${htmlPreview}`);
         }
         if (!res.ok) throw new Error("Failed to load stadium data");
         return res.json();
@@ -280,7 +281,8 @@ export default function App() {
 
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("text/html")) {
-        throw new Error("⚠️ API Connection Error: Vercel is returning HTML instead of JSON. Ensure VITE_API_URL is set in Vercel settings and that you have Redeployed.");
+        const htmlPreview = (await response.text()).substring(0, 150);
+        throw new Error(`⚠️ API Connection Error: Received HTML instead of JSON. API_BASE is '${API_BASE_URL}'. HTML Preview: ${htmlPreview}`);
       }
 
       const data = await response.json();
