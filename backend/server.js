@@ -19,7 +19,12 @@ const PORT = process.env.PORT || 3000;
 
 // Security: HTTP Headers protection
 app.use(helmet());
-app.use(cors());
+// Security: Restrict CORS policy
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "*", // Fallback to * if env not set, but restricts on prod
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 // Security: Limit body payload size
 app.use(express.json({ limit: "10kb" }));
 
@@ -94,9 +99,10 @@ app.post("/api/chat", async (req, res) => {
     try {
       ai = getGeminiClient();
     } catch (err) {
+      console.error("Configuration Error:", err.message);
       return res.status(500).json({ 
         error: "Configuration Error", 
-        details: err.message 
+        details: "Internal server configuration error." 
       });
     }
 
@@ -147,10 +153,10 @@ DIRECTIONS & RULES FOR YOUR RESPONSES:
     res.json({ reply: replyText });
 
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Gemini API Error:", error.message || error);
     res.status(500).json({ 
       error: "Gemini Service Error", 
-      details: error.message || "An unexpected error occurred while communicating with Google Gemini." 
+      details: "An unexpected error occurred while processing your request." 
     });
   }
 });
