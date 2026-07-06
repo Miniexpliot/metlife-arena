@@ -27,7 +27,7 @@ const GOOGLE_MAPS_API_KEY =
   process.env.GOOGLE_MAPS_PLATFORM_KEY ||
   (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
   (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
-  "AIzaSyDYso_mMV8s_CVX3vs2JSt7Dte-oFmXRKU";
+  "goolge_maps_demo_api_key_here";
 
 
 interface Restroom {
