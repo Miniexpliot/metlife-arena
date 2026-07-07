@@ -14,6 +14,10 @@ import React from 'react';
  * memoized or tested independently of App render cycles.
  */
 export function renderMarkdown(text: string): React.ReactNode[] {
+  // Safety guard: prevent crash if text is undefined/null (blank screen bug)
+  if (!text || typeof text !== 'string') {
+    return [<p key="fallback" className="text-slate-400 text-sm italic">No content available.</p>];
+  }
   return text.split('\n').map((line, idx) => {
     let isBullet = false;
     let content = line;

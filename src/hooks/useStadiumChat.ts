@@ -20,9 +20,16 @@ export function useStadiumChat(
     const savedMessages = localStorage.getItem('STADIUM_CHAT_HISTORY');
     if (savedMessages) {
       try {
-        return JSON.parse(savedMessages);
+        const parsed = JSON.parse(savedMessages);
+        // Guard against corrupted localStorage entries with missing or non-string text
+        if (Array.isArray(parsed) && parsed.every((m: any) => m && typeof m.text === 'string' && typeof m.role === 'string')) {
+          return parsed;
+        }
+        console.warn('[Stealth Audit] Corrupted chat history detected, resetting.');
+        localStorage.removeItem('STADIUM_CHAT_HISTORY');
       } catch (e) {
         console.error('Failed to parse chat history', e);
+        localStorage.removeItem('STADIUM_CHAT_HISTORY');
       }
     }
     return [
@@ -131,7 +138,8 @@ export function useStadiumChat(
         throw new Error(data.details || data.error || 'Service error');
       }
 
-      setMessages((prev) => [...prev, { role: 'model', text: data.reply }]);
+      const replyText = (typeof data.reply === 'string' && data.reply) || 'I received your message but could not generate a response. Please try again.';
+      setMessages((prev) => [...prev, { role: 'model', text: replyText }]);
     } catch (error: any) {
       console.error('Chat error:', error);
 
