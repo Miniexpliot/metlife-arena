@@ -339,7 +339,7 @@ export default function RightPanel({
                     </span>
                   </div>
 
-                  {sector.concessions.map((stall, i) => (
+                  {(sector.concessions || []).map((stall, i) => (
                     <div
                       key={i}
                       className="bg-white p-3 rounded-xl border border-slate-200 shadow-md text-xs hover:border-indigo-300 transition-colors"
@@ -379,17 +379,17 @@ export default function RightPanel({
                       </div>
 
                       <div className="flex gap-1.5 pt-1">
-                        {stall.vegetarianOptions.length > 0 && (
+                        {(stall.vegetarianOptions || []).length > 0 && (
                           <span className="text-[9px] text-green-700 bg-green-50 border border-green-200 font-bold px-1.5 py-0.5 rounded-md">
                             🌱 VEG
                           </span>
                         )}
-                        {stall.veganOptions.length > 0 && (
+                        {(stall.veganOptions || []).length > 0 && (
                           <span className="text-[9px] text-emerald-700 bg-emerald-50 border border-emerald-200 font-bold px-1.5 py-0.5 rounded-md">
                             🍃 VEGAN
                           </span>
                         )}
-                        {stall.glutenFreeOptions.length > 0 && (
+                        {(stall.glutenFreeOptions || []).length > 0 && (
                           <span className="text-[9px] text-blue-700 bg-blue-50 border border-blue-200 font-bold px-1.5 py-0.5 rounded-md">
                             🌾 GF
                           </span>
@@ -428,7 +428,7 @@ export default function RightPanel({
               <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Ground Safety Protocol
               </span>
-              {stadiumData?.emergencyInfo.rules.map((rule, idx) => (
+              {(stadiumData?.emergencyInfo?.rules || []).map((rule, idx) => (
                 <div
                   key={idx}
                   className="bg-white p-2.5 rounded-xl border border-slate-200 text-xs text-slate-600 flex gap-2"
