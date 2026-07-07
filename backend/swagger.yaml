@@ -24,6 +24,29 @@ paths:
           description: Unauthorized (Missing or invalid API key)
         '500':
           description: Server Error (Database unavailable)
+  /chat:
+    post:
+      summary: Send a message to the AI Stadium Assistant
+      description: Sends a user message with location context and chat history to the Gemini-powered RAG assistant. Responses are grounded in the live stadium database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: AI-generated response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Invalid input payload or prompt injection detected
+        '429':
+          description: Rate limit exceeded (100 requests per 15-minute window)
+        '500':
+          description: Gemini API error or internal server error
 components:
   securitySchemes:
     ApiKeyAuth:
@@ -31,6 +54,44 @@ components:
       in: header
       name: x-api-key
   schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          maxLength: 500
+          description: The user's chat message (max 500 characters)
+        history:
+          type: array
+          maxItems: 30
+          description: Previous conversation turns for multi-turn context
+          items:
+            type: object
+            required:
+              - role
+              - text
+            properties:
+              role:
+                type: string
+                enum: [user, model]
+              text:
+                type: string
+                maxLength: 2000
+        currentLocation:
+          type: string
+          maxLength: 100
+          description: The fan's current stadium sector/gate location
+    ChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+          description: AI-generated response grounded in stadium data
+        cached:
+          type: boolean
+          description: Whether this response was served from the spatial cache
     StadiumData:
       type: object
       properties:
@@ -95,3 +156,4 @@ components:
           type: integer
         crowdStatus:
           type: string
+

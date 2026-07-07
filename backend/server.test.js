@@ -155,6 +155,19 @@ describe('Backend API Tests', () => {
     expect(res.body.error).toContain('security threat detected');
   });
 
+  // ── API Key Authentication ─────────────────────────────────────────────
+  it('GET /api/stadium should return 401 without API key', async () => {
+    const res = await request(app).get('/api/stadium');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toContain('Unauthorized');
+  });
+
+  it('GET /api/stadium should return 401 with invalid API key', async () => {
+    const res = await request(app).get('/api/stadium').set('x-api-key', 'totally-wrong-key');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toContain('Unauthorized');
+  });
+
   // ── 404 ──────────────────────────────────────────────────────────────────
   it('should return 404 for unknown routes', async () => {
     const res = await request(app).get('/api/nonexistent');

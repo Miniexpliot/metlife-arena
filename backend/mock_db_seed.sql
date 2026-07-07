@@ -134,10 +134,12 @@ CREATE TRIGGER update_gates_modtime BEFORE UPDATE ON gates FOR EACH ROW EXECUTE 
 -- ==========================================
 
 -- Create a least-privilege role
+-- SECURITY: Password injected via environment variable at deploy time.
+-- Usage: psql -v password="$DB_READONLY_PASS" -f mock_db_seed.sql
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'readonly_api_user') THEN
-    CREATE ROLE readonly_api_user LOGIN PASSWORD 'secure_pass';
+    CREATE ROLE readonly_api_user LOGIN PASSWORD 'CHANGE_ME_AT_DEPLOY_TIME';
   END IF;
 END
 $$;

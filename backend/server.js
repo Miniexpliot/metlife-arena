@@ -243,6 +243,7 @@ app.get('/api/stadium', requireApiKey, (req, res) => {
 // Predictive Spatial Cache (Efficiency Optimization)
 const spatialCache = new Map();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes TTL
+const MAX_CACHE_SIZE = 500; // LRU eviction cap to prevent unbounded memory growth
 
 app.post('/api/chat', async (req, res) => {
   try {
@@ -350,8 +351,12 @@ app.post('/api/chat', async (req, res) => {
     const replyText =
       response.text || 'I apologize, but I could not formulate a response. Please try again.';
     
-    // Populate the cache for future localized queries
+    // Populate the cache for future localized queries (with LRU eviction)
     if (isZeroShot) {
+      if (spatialCache.size >= MAX_CACHE_SIZE) {
+        const oldestKey = spatialCache.keys().next().value;
+        spatialCache.delete(oldestKey);
+      }
       spatialCache.set(cacheKey, { reply: replyText, timestamp: Date.now() });
     }
 
