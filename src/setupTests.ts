@@ -23,10 +23,10 @@ global.fetch = vi.fn().mockImplementation((url: string) => {
       headers: { get: (_name: string) => null },
       json: () =>
         Promise.resolve({
-          stadium_name: 'Mock Stadium',
+          stadiumName: 'Mock Stadium',
           sectors: [],
-          gate_status: {},
-          emergency_info: { rules: [] },
+          gateStatus: {},
+          emergencyInfo: { rules: [] },
         }),
     });
   }

@@ -9,9 +9,9 @@ const STADIUM_LNG = -74.0744;
 const MAX_STADIUM_RADIUS_DEG = 0.05;
 
 const SECTIONS = [
-  'Section 104', 'Section 112', 'Section 124', 'Section 143',
-  'Section 201', 'Section 224', 'Section 248', 'Section 301',
-  'Section 315', 'Section 340', 'Club Level 12', 'Mezzanine Suite 4',
+  '100-Level (Lower Bowl) - Section 104', '100-Level (Lower Bowl) - Section 112', '100-Level (Lower Bowl) - Section 124', '100-Level (Lower Bowl) - Section 143',
+  '200-Level (Mezzanine & Clubs) - Section 201', '200-Level (Mezzanine & Clubs) - Section 224', '200-Level (Mezzanine & Clubs) - Section 248', '200-Level (Mezzanine & Clubs) - Club Level 12',
+  '300-Level (Upper Deck) - Section 301', '300-Level (Upper Deck) - Section 315', '300-Level (Upper Deck) - Section 340', '200-Level (Mezzanine & Clubs) - Mezzanine Suite 4',
 ];
 
 const SEATS = [

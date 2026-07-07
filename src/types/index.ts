@@ -2,8 +2,8 @@ export interface Restroom {
   name: string;
   location: string;
   types: string[];
-  wait_time_minutes: number;
-  crowd_status: string;
+  waitTimeMinutes: number;
+  crowdStatus: string;
 }
 
 export interface Concession {
@@ -11,11 +11,11 @@ export interface Concession {
   location: string;
   cuisine: string;
   menu: string[];
-  vegetarian_options: string[];
-  vegan_options: string[];
-  gluten_free_options: string[];
-  wait_time_minutes: number;
-  crowd_status: string;
+  vegetarianOptions: string[];
+  veganOptions: string[];
+  glutenFreeOptions: string[];
+  waitTimeMinutes: number;
+  crowdStatus: string;
 }
 
 export interface Amenity {
@@ -28,7 +28,10 @@ export interface Amenity {
 
 export interface Sector {
   id: string;
-  description: string;
+  description: {
+    en: string;
+    [key: string]: string;
+  };
   gates: string[];
   amenities: Amenity[];
   concessions: Concession[];
@@ -37,17 +40,17 @@ export interface Sector {
 
 export interface GateInfo {
   status: string;
-  security_wait_minutes: number;
-  crowd_density: string;
+  securityWaitMinutes: number;
+  crowdDensity: string;
 }
 
 export interface StadiumData {
-  stadium_name: string;
+  stadiumName: string;
   sectors: Sector[];
-  gate_status: { [key: string]: GateInfo };
-  emergency_info: {
-    emergency_number: string;
-    evacuation_assembly_points: string;
+  gateStatus: { [key: string]: GateInfo };
+  emergencyInfo: {
+    emergencyNumber: string;
+    evacuationAssemblyPoints: string;
     rules: string[];
   };
 }

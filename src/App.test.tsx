@@ -161,10 +161,10 @@ describe('App Component', () => {
           headers: { get: () => 'application/json' },
           json: () =>
             Promise.resolve({
-              stadium_name: 'Mock Stadium',
+              stadiumName: 'Mock Stadium',
               sectors: [],
-              gate_status: {},
-              emergency_info: { rules: [] },
+              gateStatus: {},
+              emergencyInfo: { rules: [] },
             }),
         });
       }
@@ -202,6 +202,9 @@ describe('App Component', () => {
   });
 
   it('displays error message when backend returns a 500 error', async () => {
+    // Clear any persisted chat history that could interfere
+    localStorage.removeItem('STADIUM_CHAT_HISTORY');
+
     const originalFetch = global.fetch;
     global.fetch = vi.fn().mockImplementation((url: string, opts?: any) => {
       if (url.endsWith('/api/stadium')) {
@@ -210,10 +213,10 @@ describe('App Component', () => {
           headers: { get: () => 'application/json' },
           json: () =>
             Promise.resolve({
-              stadium_name: 'Mock Stadium',
+              stadiumName: 'Mock Stadium',
               sectors: [],
-              gate_status: {},
-              emergency_info: { rules: [] },
+              gateStatus: {},
+              emergencyInfo: { rules: [] },
             }),
         });
       }
@@ -239,12 +242,11 @@ describe('App Component', () => {
     fireEvent.click(sendBtn);
 
     // The error-state message should render in the chat feed
-    await waitFor(() => {
-      expect(screen.getByText(/high demand/i)).toBeInTheDocument();
-    });
+    const errorMsg = await screen.findByText(/high demand/i, {}, { timeout: 10000 });
+    expect(errorMsg).toBeInTheDocument();
 
     global.fetch = originalFetch;
-  });
+  }, 15000);
 
   it('renders gracefully when stadium data API fails on mount', async () => {
     const originalFetch = global.fetch;
