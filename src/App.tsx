@@ -1,6 +1,6 @@
 import Header from './components/Header';
 import MobileNav from './components/MobileNav';
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import {
@@ -29,14 +29,18 @@ import {
 } from 'lucide-react';
 
 import type { StadiumData, GateInfo, ChatMessage } from './types';
+import { renderMarkdown } from './utils/renderMarkdown';
+import { generateUniqueLocationName } from './utils/locationUtils';
+import { SUGGESTED_QUERIES } from './constants/suggestedQueries';
 
-// Environment variables injected by Vite at build time — kept outside component to avoid re-evaluation per render
-// @ts-ignore
+// vite-env.d.ts provides full type safety for import.meta.env — no @ts-ignore needed
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-// @ts-ignore
 const RAW_API_URL = import.meta.env.VITE_API_URL || '';
 // Normalize trailing slash to prevent double-slash in fetch URLs
 const API_BASE_URL = RAW_API_URL.endsWith('/') ? RAW_API_URL.slice(0, -1) : RAW_API_URL;
+
+/** Maximum chat history items sent to the backend per request to bound payload size */
+const MAX_HISTORY_SENT = 20;
 
 export default function App() {
   const [stadiumData, setStadiumData] = useState<StadiumData | null>(null);
@@ -74,9 +78,10 @@ export default function App() {
   const [gpsLoading, setGpsLoading] = useState<boolean>(false);
   const [detectedCoords, setDetectedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [customDetectedLocations, setCustomDetectedLocations] = useState<string[]>([]);
-  const [customApiKey, setCustomApiKey] = useState<string>(() => {
-    return localStorage.getItem('USER_GOOGLE_MAPS_KEY') || '';
-  });
+  // API key lives in session state only — never persisted to localStorage.
+  // localStorage is readable by any injected script (XSS), making it unsafe
+  // for credential storage. Users re-enter the key each session if needed.
+  const [customApiKey, setCustomApiKey] = useState<string>('');
   const [tempKeyInput, setTempKeyInput] = useState<string>('');
 
   const activeGoogleMapsKey = customApiKey.trim() || GOOGLE_MAPS_API_KEY;
@@ -87,22 +92,7 @@ export default function App() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Suggested queries for users
-  const suggestedQueries = [
-    {
-      label: '🍔 Nearest Vegetarian?',
-      query: 'Where is the nearest vegetarian food options from my location?',
-    },
-    {
-      label: '🚪 Shortest Wait Gate?',
-      query: 'Which gates have the shortest wait times right now?',
-    },
-    { label: '🚑 Medical First Aid?', query: 'Help, where is the nearest first aid station?' },
-    {
-      label: '🌐 Translate Ticket Query',
-      query: "Translate 'Where is my seating block?' to Spanish and French.",
-    },
-  ];
+  // SUGGESTED_QUERIES imported from constants — not re-allocated on each render
 
   // Stop any active TTS when switching pages or unmounting
   useEffect(() => {
@@ -145,46 +135,7 @@ export default function App() {
     }
   };
 
-  const generateUniqueLocationName = (lat: number, lon: number) => {
-    // MetLife Stadium coordinates
-    const stadiumLat = 40.8135;
-    const stadiumLng = -74.0744;
-
-    // Check approximate distance (0.05 degrees is roughly 3-5 miles)
-    const distance = Math.sqrt(Math.pow(lat - stadiumLat, 2) + Math.pow(lon - stadiumLng, 2));
-    if (distance > 0.05) {
-      return 'Outside Stadium Boundaries (Remote Access)';
-    }
-
-    const sections = [
-      'Section 104',
-      'Section 112',
-      'Section 124',
-      'Section 143',
-      'Section 201',
-      'Section 224',
-      'Section 248',
-      'Section 301',
-      'Section 315',
-      'Section 340',
-      'Club Level 12',
-      'Mezzanine Suite 4',
-    ];
-    const seats = [
-      'Row 4, Seat 18',
-      'Row 12, Seat 5',
-      'Row 15, Seat 22',
-      'Row 20, Seat 1',
-      'Row 28, Seat 14',
-      'Wheelchair Bay 3',
-      'Standing Zone A',
-    ];
-
-    const seed1 = Math.floor(Math.abs(lat * 10000)) % sections.length;
-    const seed2 = Math.floor(Math.abs(lon * 10000)) % seats.length;
-
-    return `${sections[seed1]} - ${seats[seed2]}`;
-  };
+  // generateUniqueLocationName imported from utils/locationUtils — pure function, no state dependency
 
   const handleDetectLocation = () => {
     setGpsLoading(true);
@@ -291,14 +242,15 @@ export default function App() {
         ? `${currentLocation} (Exact GPS Coordinates - Latitude: ${detectedCoords.lat.toFixed(6)}, Longitude: ${detectedCoords.lng.toFixed(6)})`
         : `${currentLocation}`;
 
+      // Trim history to the last MAX_HISTORY_SENT items to prevent unbounded payload growth
+      const trimmedHistory = newMessages.slice(0, -1).slice(-MAX_HISTORY_SENT);
+
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: textToSend,
-          history: newMessages.slice(0, -1),
+          history: trimmedHistory,
           currentLocation: `${locationContext} (Language Preferred: ${selectedLanguage})`,
         }),
       });
@@ -406,57 +358,7 @@ export default function App() {
     };
   }, [stadiumData, currentLocation]);
 
-  // Custom Markdown renderer
-  const renderMarkdown = (text: string) => {
-    return text.split('\n').map((line, idx) => {
-      let isBullet = false;
-      let content = line;
-
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        isBullet = true;
-        content = line.substring(2);
-      } else if (line.match(/^\d+\.\s/)) {
-        isBullet = true;
-        content = line.replace(/^\d+\.\s/, '');
-      }
-
-      const parts = content.split(/(\*\*.*?\*\*)/);
-      const parsedLine = parts.map((part, pIdx) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return (
-            <strong
-              key={pIdx}
-              className="font-semibold text-slate-900 bg-indigo-50 px-1 rounded border border-indigo-100"
-            >
-              {part.slice(2, -2)}
-            </strong>
-          );
-        }
-        return part;
-      });
-
-      if (isBullet) {
-        return (
-          <li
-            key={idx}
-            className="ml-5 list-disc pl-1 mb-1.5 text-slate-700 text-sm leading-relaxed"
-          >
-            {parsedLine}
-          </li>
-        );
-      }
-
-      if (line.trim() === '') {
-        return <div key={idx} className="h-2" />;
-      }
-
-      return (
-        <p key={idx} className="text-slate-700 text-sm leading-relaxed mb-2">
-          {parsedLine}
-        </p>
-      );
-    });
-  };
+  // renderMarkdown imported from utils/renderMarkdown — pure function, no state dependency
 
   return (
     <div className="h-[100dvh] flex flex-col bg-slate-50 font-sans overflow-hidden">
@@ -471,15 +373,14 @@ export default function App() {
         >
           {/* Status Label */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               Your Status
-            </label>
+            </span>
             <div className="space-y-4">
-              {/* Custom Animated Location Dropdown */}
               <div className="relative">
-                <label className="block text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
+                <span className="block text-xs font-semibold text-slate-600 mb-1.5 flex items-center gap-1">
                   <MapPin size={14} className="text-indigo-600" /> Current Location
-                </label>
+                </span>
                 <button
                   onClick={() => setIsLocationDropdownOpen(!isLocationDropdownOpen)}
                   aria-expanded={isLocationDropdownOpen}
@@ -577,11 +478,10 @@ export default function App() {
               </p>
             </div>
 
-            {/* Language Settings (Flags) */}
             <div className="pt-2 border-t border-slate-100">
-              <label className="block text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1">
+              <span className="block text-xs font-semibold text-slate-600 mb-2 flex items-center gap-1">
                 <Globe size={14} className="text-indigo-600" /> Assistant Language
-              </label>
+              </span>
               <div className="flex gap-2.5">
                 {[
                   { code: 'en', flag: '🇺🇸', name: 'English (US)' },
@@ -620,9 +520,9 @@ export default function App() {
 
           {/* Vitals Panel */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
               Stadium Vitals
-            </label>
+            </span>
             <div className="space-y-3">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                 <p className="text-[10px] text-slate-500 uppercase font-semibold">Crowd Density</p>
@@ -637,8 +537,13 @@ export default function App() {
                     }`}
                   >
                     {vitals.density}
+                    {/* WCAG 1.4.1: sr-only text alternative for colour-only status */}
+                    <span className="sr-only">
+                      Crowd density level: {vitals.density}
+                    </span>
                   </span>
                   <button
+                    aria-label="View live crowd density map"
                     className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md text-[10px] font-bold border border-indigo-200 transition-all shadow-sm active:scale-95"
                     onClick={() => {
                       setRightActiveTab('map');
@@ -678,6 +583,7 @@ export default function App() {
           <div className="mt-auto pt-4">
             <button
               id="emergency_btn"
+              aria-label="Request emergency assistance and locate nearest first aid station"
               onClick={() => {
                 setMobileTab('chat');
                 handleSendMessage(
@@ -701,7 +607,7 @@ export default function App() {
               <Sparkles size={12} className="text-indigo-600" /> Tap quick matchday queries:
             </p>
             <div className="flex flex-wrap gap-2 sm:gap-2.5">
-              {suggestedQueries.map((item, i) => (
+              {SUGGESTED_QUERIES.map((item, i) => (
                 <motion.button
                   key={i}
                   id={`suggest_query_${i}`}
@@ -893,11 +799,15 @@ export default function App() {
         <aside
           className={`w-full lg:w-80 bg-slate-50 lg:border-l border-slate-200 flex-col overflow-hidden flex-shrink-0 flex-1 lg:flex-none min-h-0 ${mobileTab === 'deck' ? 'flex' : 'hidden lg:flex'}`}
         >
-          {/* Deck selector headers */}
-          <div className="grid grid-cols-3 bg-slate-100 border-b border-slate-200 p-1">
+          {/* Deck selector — role="tablist" enables screen-reader tab navigation */}
+          <div role="tablist" aria-label="Stadium information panels" className="grid grid-cols-3 bg-slate-100 border-b border-slate-200 p-1">
             <button
+              role="tab"
+              id="tab-map"
+              aria-selected={rightActiveTab === 'map'}
+              aria-controls="tabpanel-map"
               onClick={() => setRightActiveTab('map')}
-              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer ${
+              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightActiveTab === 'map'
                   ? 'bg-white text-indigo-700 shadow-sm'
                   : 'text-slate-500 hover:text-slate-900'
@@ -906,8 +816,12 @@ export default function App() {
               🗺️ Crowd Map
             </button>
             <button
+              role="tab"
+              id="tab-concessions"
+              aria-selected={rightActiveTab === 'concessions'}
+              aria-controls="tabpanel-concessions"
               onClick={() => setRightActiveTab('concessions')}
-              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer ${
+              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightActiveTab === 'concessions'
                   ? 'bg-white text-indigo-700 shadow-sm'
                   : 'text-slate-500 hover:text-slate-900'
@@ -916,8 +830,12 @@ export default function App() {
               🍔 Concessions
             </button>
             <button
+              role="tab"
+              id="tab-rules"
+              aria-selected={rightActiveTab === 'rules'}
+              aria-controls="tabpanel-rules"
               onClick={() => setRightActiveTab('rules')}
-              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer ${
+              className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 rightActiveTab === 'rules'
                   ? 'bg-white text-indigo-700 shadow-sm'
                   : 'text-slate-500 hover:text-slate-900'
@@ -931,17 +849,19 @@ export default function App() {
           <div className="flex-1 p-4 overflow-y-auto space-y-4">
             {/* TAB 1: CROWD MAP */}
             {rightActiveTab === 'map' && (
-              <div className="space-y-4">
+              <div role="tabpanel" id="tabpanel-map" aria-labelledby="tab-map" className="space-y-4">
                 {/* Real Live GPS Google Map */}
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {/* span instead of label — no associated form control */}
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                       Live GPS Satellite Map
-                    </label>
+                    </span>
                     <a
                       href="https://maps.google.com/?q=MetLife+Stadium"
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="Open MetLife Stadium in Google Maps"
                       className="text-[9px] bg-indigo-600 text-white px-2 py-1 rounded-md font-bold flex items-center gap-1 shadow-[0_0_10px_rgba(79,70,229,0.3)] hover:bg-indigo-500 hover:scale-105 transition-all animate-pulse"
                     >
                       Open in Maps ↗️
@@ -963,23 +883,26 @@ export default function App() {
                           configure your key using either method below:
                         </p>
 
-                        {/* Interactive In-App Key Activation */}
+                        {/* Interactive In-App Key Activation — key stored in session state only (not localStorage) */}
                         <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80 mb-3">
-                          <label className="block text-[8px] text-slate-400 font-bold mb-1 uppercase tracking-wider">
+                          {/* span not label — the input below has its own aria-label */}
+                          <span className="block text-[8px] text-slate-400 font-bold mb-1 uppercase tracking-wider">
                             Option A: Quick Activation (Instant)
-                          </label>
+                          </span>
                           <div className="flex gap-2">
                             <input
                               type="password"
+                              aria-label="Google Maps API key"
                               value={tempKeyInput}
                               onChange={(e) => setTempKeyInput(e.target.value)}
                               placeholder="Paste Google Maps API key..."
                               className="flex-1 text-[11px] bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-200 outline-none focus:ring-1 focus:ring-indigo-500 font-mono placeholder:text-slate-600"
                             />
                             <button
+                              aria-label="Activate Google Maps API key"
                               onClick={() => {
                                 if (tempKeyInput.trim()) {
-                                  localStorage.setItem('USER_GOOGLE_MAPS_KEY', tempKeyInput.trim());
+                                  // Store in session state only — not localStorage (XSS risk)
                                   setCustomApiKey(tempKeyInput.trim());
                                 }
                               }}
@@ -1070,6 +993,7 @@ export default function App() {
                             <div className="flex gap-1.5">
                               <input
                                 type="password"
+                                aria-label="Custom Google Maps API key"
                                 value={tempKeyInput}
                                 onChange={(e) => setTempKeyInput(e.target.value)}
                                 placeholder={
@@ -1080,12 +1004,10 @@ export default function App() {
                                 className="flex-1 text-[10px] bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 font-mono placeholder:text-slate-400"
                               />
                               <button
+                                aria-label="Save custom Google Maps API key"
                                 onClick={() => {
                                   if (tempKeyInput.trim()) {
-                                    localStorage.setItem(
-                                      'USER_GOOGLE_MAPS_KEY',
-                                      tempKeyInput.trim()
-                                    );
+                                    // Store in session state only — not localStorage (XSS risk)
                                     setCustomApiKey(tempKeyInput.trim());
                                     setTempKeyInput('');
                                     setShowKeyConfig(false);
@@ -1099,11 +1021,12 @@ export default function App() {
                             {customApiKey && (
                               <div className="flex justify-between items-center pt-1">
                                 <span className="text-[8px] text-slate-400">
-                                  Saved in your browser local storage.
+                                  Active for this session only.
                                 </span>
                                 <button
+                                  aria-label="Reset to default demo API key"
                                   onClick={() => {
-                                    localStorage.removeItem('USER_GOOGLE_MAPS_KEY');
+                                    // Clear session state — no localStorage to clean up
                                     setCustomApiKey('');
                                     setTempKeyInput('');
                                     setShowKeyConfig(false);
@@ -1123,9 +1046,16 @@ export default function App() {
 
                 {/* Gate wait times list */}
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Entry Gate Wait Times
-                  </label>
+                  </span>
+                  <button
+                    aria-label="View live crowd map"
+                    className="sr-only"
+                    onClick={() => setRightActiveTab('map')}
+                  >
+                    View map
+                  </button>
                   {stadiumData ? (
                     (Object.entries(stadiumData.gate_status) as [string, GateInfo][])
                       .slice(0, 4)
@@ -1153,13 +1083,14 @@ export default function App() {
               </div>
             )}
 
-            {/* TAB 2: CONCESSIONS DETAILED REGISTER */}
+            {/* TAB 2: CONCESSIONS */}
             {rightActiveTab === 'concessions' && (
-              <div className="space-y-4">
+              <div role="tabpanel" id="tabpanel-concessions" aria-labelledby="tab-concessions" className="space-y-4">
                 <div className="border-b border-slate-200 pb-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {/* span instead of label — no associated form control */}
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Concessions Database
-                  </label>
+                  </span>
                   <p className="text-[9px] text-slate-400 mt-0.5">
                     Used as context grounding for Gemini answers
                   </p>
@@ -1241,11 +1172,12 @@ export default function App() {
 
             {/* TAB 3: SAFETY RULES */}
             {rightActiveTab === 'rules' && (
-              <div className="space-y-4">
+              <div role="tabpanel" id="tabpanel-rules" aria-labelledby="tab-rules" className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                  {/* span instead of label — no associated form control */}
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                     Emergency Contact info
-                  </label>
+                  </span>
                   <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-900 text-xs">
                     <p className="font-bold flex items-center gap-1">
                       🚨 Dispatch Medical Hotline:
@@ -1261,9 +1193,10 @@ export default function App() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {/* span instead of label — no associated form control */}
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Ground Safety Protocol
-                  </label>
+                  </span>
                   {stadiumData?.emergency_info.rules.map((rule, idx) => (
                     <div
                       key={idx}

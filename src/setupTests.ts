@@ -13,13 +13,22 @@ Object.defineProperty(window, 'speechSynthesis', {
   writable: true,
 });
 
-// Mock fetch for /api/stadium to prevent invalid URL error
-global.fetch = vi.fn().mockImplementation((url) => {
-  if (url === '/api/stadium') {
+// Mock fetch for /api/stadium to prevent invalid URL error in jsdom.
+// The headers mock must include a `.get()` function because App.tsx checks
+// `res.headers.get('content-type')` before calling res.json().
+global.fetch = vi.fn().mockImplementation((url: string) => {
+  if (url.endsWith('/api/stadium')) {
     return Promise.resolve({
       ok: true,
-      json: () => Promise.resolve({ stadium_name: 'Mock Stadium' }),
+      headers: { get: (_name: string) => null },
+      json: () =>
+        Promise.resolve({
+          stadium_name: 'Mock Stadium',
+          sectors: [],
+          gate_status: {},
+          emergency_info: { rules: [] },
+        }),
     });
   }
-  return Promise.reject(new Error('Unknown URL'));
+  return Promise.reject(new Error(`Unmocked fetch URL: ${url}`));
 });
