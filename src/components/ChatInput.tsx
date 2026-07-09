@@ -5,7 +5,7 @@ interface ChatInputProps {
   isLoading: boolean;
 }
 
-export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
+const ChatInput = React.memo(function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
   const [inputMessage, setInputMessage] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,4 +39,6 @@ export default function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
       </div>
     </form>
   );
-}
+});
+
+export default ChatInput;

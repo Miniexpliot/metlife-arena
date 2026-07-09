@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Header() {
+const Header = React.memo(function Header() {
   return (
     <header
       aria-label="Main Application Header"
@@ -43,4 +43,6 @@ export default function Header() {
       </div>
     </header>
   );
-}
+});
+
+export default Header;

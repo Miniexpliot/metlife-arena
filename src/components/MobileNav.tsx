@@ -6,7 +6,7 @@ interface MobileNavProps {
   setMobileTab: (tab: 'controls' | 'chat' | 'deck') => void;
 }
 
-export default function MobileNav({ mobileTab, setMobileTab }: MobileNavProps) {
+const MobileNav = React.memo(function MobileNav({ mobileTab, setMobileTab }: MobileNavProps) {
   return (
     <nav
       aria-label="Mobile Navigation"
@@ -55,4 +55,6 @@ export default function MobileNav({ mobileTab, setMobileTab }: MobileNavProps) {
       </button>
     </nav>
   );
-}
+});
+
+export default MobileNav;
