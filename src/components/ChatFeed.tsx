@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React, { RefObject, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, VolumeX, Volume2 } from 'lucide-react';
 import { SUGGESTED_QUERIES } from '../constants/suggestedQueries';
@@ -32,6 +32,10 @@ export default function ChatFeed({
   toggleSpeakMessage,
   chatEndRef,
 }: ChatFeedProps) {
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoadingChat, chatEndRef]);
+
   return (
     <section
       className={`flex-1 bg-slate-50 flex-col justify-between overflow-hidden relative min-h-0 ${
