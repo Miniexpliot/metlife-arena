@@ -128,10 +128,10 @@ describe('Backend API Tests', () => {
   });
 
   // ── Input validation — location ──────────────────────────────────────────
-  it('POST /api/chat should reject oversized currentLocation (>100 chars)', async () => {
+  it('POST /api/chat should reject oversized currentLocation (>255 chars)', async () => {
     const res = await request(app).post('/api/chat').send({
       message: 'Valid message',
-      currentLocation: 'X'.repeat(150),
+      currentLocation: 'X'.repeat(300),
     });
     expect(res.status).toBe(400);
     expect(res.body.error).toContain('Invalid location payload');

@@ -301,9 +301,9 @@ app.post('/api/chat', async (req, res) => {
     }
 
     if (currentLocation !== undefined &&
-        (typeof currentLocation !== 'string' || currentLocation.length > 100)) {
+        (typeof currentLocation !== 'string' || currentLocation.length > 255)) {
       return res.status(400).json({
-        error: 'Invalid location payload. Must be a string under 100 characters.',
+        error: 'Invalid location payload. Must be a string under 255 characters.',
       });
     }
 
