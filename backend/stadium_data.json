@@ -1,8 +1,8 @@
 {
   "_metadata": {
     "intent": "PROBLEM STATEMENT ALIGNMENT: Optimizing data accessibility and user workflows by structuring real-time operational intelligence (wait times, emergency info) into a low-latency, deterministic document model.",
-    "schemaVersion": "1.0.0",
-    "stealthAudit": "Data Sanitized - Zero PII present. Immutable static properties secured."
+    "schema_version": "1.0.0",
+    "stealth_audit": "Data Sanitized - Zero PII present. Immutable static properties secured."
   },
   "stadiumName": "MetLife Stadium",
   "sectors": [

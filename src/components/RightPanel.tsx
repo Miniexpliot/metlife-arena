@@ -291,7 +291,7 @@ export default function RightPanel({
                 View map
               </button>
               {stadiumData ? (
-                (Object.entries(stadiumData.gateStatus) as [string, GateInfo][])
+                (Object.entries(stadiumData.gateStatus || {}) as [string, GateInfo][])
                   .slice(0, 4)
                   .map(([gate, info]) => (
                     <div
@@ -330,12 +330,12 @@ export default function RightPanel({
             </div>
 
             <div className="space-y-3">
-              {stadiumData?.sectors.map((sector) => (
+              {(stadiumData?.sectors || []).map((sector) => (
                 <div key={sector.id} className="space-y-2">
                   <div className="bg-slate-200 text-slate-800 px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wide flex justify-between">
                     <span>{sector.id}</span>
                     <span className="text-slate-500 font-normal">
-                      {sector.gates.join(', ')}
+                      {(sector.gates || []).join(', ')}
                     </span>
                   </div>
 
@@ -367,7 +367,7 @@ export default function RightPanel({
                           Menu Highlights
                         </p>
                         <div className="flex flex-wrap gap-1.5">
-                          {stall.menu.map((item, mIdx) => (
+                          {(stall.menu || []).map((item, mIdx) => (
                             <span
                               key={mIdx}
                               className="bg-white border border-slate-200 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-md shadow-sm"

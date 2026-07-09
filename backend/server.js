@@ -98,11 +98,15 @@ async function loadAndValidateDatabase() {
 // we just call it.
 loadAndValidateDatabase();
 
-// Efficiency: Hot-reload on file change
-fs.watch(stadiumDataPath, async (eventType) => {
+// Efficiency: Hot-reload on file change (debounced to prevent duplicate events)
+let reloadTimeout = null;
+fs.watch(stadiumDataPath, (eventType) => {
   if (eventType === 'change') {
-    console.log('Database file changed. Performing hot-reload...');
-    await loadAndValidateDatabase();
+    clearTimeout(reloadTimeout);
+    reloadTimeout = setTimeout(async () => {
+      console.log('Database file changed. Performing hot-reload...');
+      await loadAndValidateDatabase();
+    }, 300); // 300ms debounce
   }
 });
 
@@ -174,7 +178,17 @@ const auditLogger = winston.createLogger({
 });
 
 app.use('/api', (req, res, next) => {
-  auditLogger.info(`Method: ${req.method} | Route: ${req.originalUrl} | IP: ${req.ip}`);
+  const correlationId = crypto.randomUUID();
+  req.correlationId = correlationId;
+  res.setHeader('X-Correlation-ID', correlationId);
+  auditLogger.info(JSON.stringify({
+    correlationId,
+    method: req.method,
+    route: req.originalUrl,
+    ip: req.ip,
+    userAgent: req.headers['user-agent'],
+    bodyHash: req.body ? crypto.createHash('sha256').update(JSON.stringify(req.body)).digest('hex').substring(0, 16) : null,
+  }));
   next();
 });
 
@@ -219,7 +233,7 @@ async function requireApiKey(req, res, next) {
   // Proper DB-backed credential security practices
   try {
     const hashedKey = crypto.createHash('sha256').update(apiKey).digest('hex');
-    const result = await dbPool.query('SELECT id FROM api_keys WHERE api_key_hash = $1', [hashedKey]);
+    const result = await dbPool.query('SELECT id FROM api_keys WHERE api_key_hash = $1 AND is_active = TRUE', [hashedKey]);
     
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Unauthorized: Invalid API key' });

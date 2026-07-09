@@ -130,10 +130,18 @@ components:
           type: array
           items:
             type: string
+        amenities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Amenity'
         concessions:
           type: array
           items:
             $ref: '#/components/schemas/Concession'
+        restrooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Restroom'
     GateStatus:
       type: object
       properties:
@@ -141,7 +149,21 @@ components:
           type: string
         securityWaitMinutes:
           type: integer
+          minimum: 0
         crowdDensity:
+          type: string
+    Amenity:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        location:
+          type: string
+        status:
+          type: string
+        details:
           type: string
     Concession:
       type: object
@@ -152,8 +174,50 @@ components:
           type: string
         cuisine:
           type: string
+        menu:
+          type: array
+          items:
+            type: string
+        vegetarianOptions:
+          type: array
+          items:
+            type: string
+        veganOptions:
+          type: array
+          items:
+            type: string
+        glutenFreeOptions:
+          type: array
+          items:
+            type: string
         waitTimeMinutes:
           type: integer
+          minimum: 0
         crowdStatus:
           type: string
-
+    Restroom:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        types:
+          type: array
+          items:
+            type: string
+            enum: [Male, Female, Accessible, Family]
+        waitTimeMinutes:
+          type: integer
+          minimum: 0
+        crowdStatus:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          description: Additional context (only in non-production)

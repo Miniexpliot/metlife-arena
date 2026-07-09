@@ -49,11 +49,13 @@ export default function App() {
   // Memoized Computations
   const allLocationOptions = useMemo(() => {
     const gateOpts: string[] = [];
-    if (stadiumData) {
+    if (stadiumData && Array.isArray(stadiumData.sectors)) {
       stadiumData.sectors.forEach((sector) => {
-        sector.gates.forEach((gate) => {
-          gateOpts.push(`${sector.id} - ${gate}`);
-        });
+        if (Array.isArray(sector.gates)) {
+          sector.gates.forEach((gate) => {
+            gateOpts.push(`${sector.id} - ${gate}`);
+          });
+        }
       });
     }
     return [...customDetectedLocations, ...gateOpts];
@@ -92,7 +94,7 @@ export default function App() {
         };
       }
 
-      const matchedSector = sectorId ? stadiumData.sectors.find((s) => s.id === sectorId) : null;
+      const matchedSector = sectorId ? (stadiumData.sectors || []).find((s) => s.id === sectorId) : null;
       let gatesToAverage: string[] = [];
       if (matchedSector && Array.isArray(matchedSector.gates)) {
         gatesToAverage = matchedSector.gates;
