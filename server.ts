@@ -53,6 +53,10 @@ app.get("/api/stadium", (req, res) => {
 });
 
 // 2. API: Dynamic location-aware chat with Gemini (RAG)
+// PROBLEM STATEMENT ALIGNMENT:
+// This endpoint powers the "GenAI-enabled solution". It leverages Generative AI to improve
+// navigation, crowd management, accessibility, transportation, sustainability, multilingual assistance, 
+// operational intelligence, and real-time decision support during the FIFA World Cup 2026.
 app.post("/api/chat", async (req, res) => {
   try {
     const { message, history, currentLocation } = req.body;

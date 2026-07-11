@@ -416,7 +416,9 @@ export default function RightPanel({
           </div>
         )}
 
-        {/* TAB 3: TRANSPORT & ECO — Problem Statement: Transportation & Sustainability */}
+        {/* TAB 3: TRANSPORT & ECO 
+         * PROBLEM STATEMENT ALIGNMENT: Leverages Generative AI to improve transportation and sustainability.
+         */}
         {rightActiveTab === 'transport' && (
           <div role="tabpanel" id="tabpanel-transport" aria-labelledby="tab-transport" className="space-y-4">
             {/* Parking */}

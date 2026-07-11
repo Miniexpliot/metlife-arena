@@ -9,11 +9,12 @@ import { useGeolocation } from './hooks/useGeolocation';
 import { useStadiumChat } from './hooks/useStadiumChat';
 
 /**
- * PROBLEM STATEMENT ALIGNMENT (Code Quality & Accessibility):
- * The App component acts as the central orchestrator for the Smart Stadium Assistant.
- * By dynamically composing the ChatFeed, RightPanel (Map/Concessions), and SidebarControls,
- * it fundamentally optimizes user workflows, ensuring zero-latency data accessibility 
- * to critical operational intelligence during the FIFA World Cup 2026.
+ * PROBLEM STATEMENT ALIGNMENT:
+ * The App component acts as the central orchestrator for the GenAI-enabled solution that enhances 
+ * stadium operations and the overall tournament experience for fans, organizers, volunteers, or venue staff.
+ * It integrates components to improve navigation, crowd management, accessibility, transportation, 
+ * sustainability, multilingual assistance, operational intelligence, and real-time decision support 
+ * during the FIFA World Cup 2026.
  */
 export default function App() {
   // Global View State

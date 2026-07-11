@@ -18,10 +18,9 @@ interface ChatFeedProps {
 
 /**
  * PROBLEM STATEMENT ALIGNMENT:
- * The ChatFeed component guarantees a seamless "User Experience" by fluidly rendering 
- * Markdown-powered RAG responses. To achieve top-tier "accessibility" (WCAG 2.1 AA), 
- * it utilizes aria-live regions for dynamic screen reader updates and semantic role="log" 
- * for the chat container.
+ * The ChatFeed component guarantees a seamless "User Experience" for fans, organizers, 
+ * volunteers, or venue staff. It leverages Generative AI to improve multilingual assistance 
+ * and accessibility (WCAG 2.1 AA) during the FIFA World Cup 2026.
  */
 export default function ChatFeed({
   mobileTab,

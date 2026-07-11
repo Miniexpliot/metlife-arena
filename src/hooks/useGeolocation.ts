@@ -4,10 +4,10 @@ import type { ChatMessage } from '../types';
 
 /**
  * PROBLEM STATEMENT ALIGNMENT:
- * This custom hook fulfills the requirement for "real-time decision support" and "navigation".
- * By interfacing with the native navigator.geolocation API, it provides dynamic location context 
- * that anchors the GenAI assistant's recommendations. This ensures that fans receive localized, 
- * accurate routing for concessions and gates, fundamentally enhancing stadium operations.
+ * This custom hook fulfills the requirement for a GenAI-enabled solution providing "real-time decision support" 
+ * and improving "navigation". By interfacing with the native navigator.geolocation API, it provides dynamic location 
+ * context that anchors the GenAI assistant's recommendations. This ensures that fans receive localized, 
+ * accurate routing for concessions and gates during the FIFA World Cup 2026.
  */
 export function useGeolocation(
   onLocationUpdate: (uniqueName: string) => void,

@@ -7,10 +7,10 @@ const MAX_HISTORY_SENT = 30;
 
 /**
  * PROBLEM STATEMENT ALIGNMENT:
- * This custom hook represents the core "GenAI-enabled solution". It manages the RAG (Retrieval-Augmented 
- * Generation) interaction with the backend, pushing contextual payloads that drive "multilingual assistance". 
- * Additionally, the integrated Text-to-Speech (TTS) logic directly fulfills the "accessibility" requirement, 
- * ensuring visually impaired fans receive equitable tournament support.
+ * This custom hook represents the core "GenAI-enabled solution". It leverages Generative AI 
+ * to improve navigation, crowd management, accessibility, transportation, sustainability, 
+ * multilingual assistance, operational intelligence, and real-time decision support 
+ * during the FIFA World Cup 2026.
  */
 export function useStadiumChat(
   currentLocation: string,

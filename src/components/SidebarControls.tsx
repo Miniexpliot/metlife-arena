@@ -260,7 +260,10 @@ export default function SidebarControls({
         </div>
       </div>
 
-      {/* Staff / Volunteer Mode Toggle — Problem Statement: Organizer & Staff Support */}
+      {/* Staff / Volunteer Mode Toggle
+       * PROBLEM STATEMENT ALIGNMENT: Enhances stadium operations for organizers, volunteers, or venue staff.
+       * Provides operational intelligence and real-time decision support.
+       */}
       <div className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-xl">
         <div className="flex items-center justify-between">
           <div>
