@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
-import { AlertCircle, X, Info } from 'lucide-react';
+import { AlertCircle, X, Info, Car, Train, Leaf, Droplets, Recycle, Bus } from 'lucide-react';
 import { GOOGLE_MAPS_API_KEY } from '../config/env';
 import type { StadiumData, GateInfo } from '../types';
 
 interface RightPanelProps {
   mobileTab: 'controls' | 'chat' | 'deck';
-  rightActiveTab: 'map' | 'concessions' | 'rules';
-  setRightActiveTab: (tab: 'map' | 'concessions' | 'rules') => void;
+  rightActiveTab: 'map' | 'concessions' | 'rules' | 'transport';
+  setRightActiveTab: (tab: 'map' | 'concessions' | 'rules' | 'transport') => void;
   detectedCoords: { lat: number; lng: number } | null;
   stadiumData: StadiumData | null;
 }
@@ -36,11 +36,10 @@ export default function RightPanel({
         mobileTab === 'deck' ? 'flex' : 'hidden lg:flex'
       }`}
     >
-      {/* Deck selector */}
       <div
         role="tablist"
         aria-label="Stadium information panels"
-        className="grid grid-cols-3 bg-slate-100 border-b border-slate-200 p-1"
+        className="grid grid-cols-4 bg-slate-100 border-b border-slate-200 p-1"
       >
         <button
           role="tab"
@@ -54,7 +53,7 @@ export default function RightPanel({
               : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          🗺️ Crowd Map
+          🗺️ Map
         </button>
         <button
           role="tab"
@@ -68,7 +67,21 @@ export default function RightPanel({
               : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          🍔 Concessions
+          🍔 Food
+        </button>
+        <button
+          role="tab"
+          id="tab-transport"
+          aria-selected={rightActiveTab === 'transport'}
+          aria-controls="tabpanel-transport"
+          onClick={() => setRightActiveTab('transport')}
+          className={`py-2 px-1 text-[10px] font-bold rounded-lg transition-all text-center whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+            rightActiveTab === 'transport'
+              ? 'bg-white text-emerald-700 shadow-sm'
+              : 'text-slate-500 hover:text-slate-900'
+          }`}
+        >
+          🚌 Transport
         </button>
         <button
           role="tab"
@@ -82,7 +95,7 @@ export default function RightPanel({
               : 'text-slate-500 hover:text-slate-900'
           }`}
         >
-          ⚠️ Safety Rules
+          ⚠️ Safety
         </button>
       </div>
 
@@ -399,6 +412,217 @@ export default function RightPanel({
                   ))}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: TRANSPORT & ECO — Problem Statement: Transportation & Sustainability */}
+        {rightActiveTab === 'transport' && (
+          <div role="tabpanel" id="tabpanel-transport" aria-labelledby="tab-transport" className="space-y-4">
+            {/* Parking */}
+            <div>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <Car size={12} className="text-indigo-500" /> Parking Lots
+              </span>
+              <div className="space-y-2">
+                {(stadiumData?.transportation?.parking || []).map((lot, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <span className="text-xs font-bold text-slate-800">{lot.name}</span>
+                        <p className="text-[9px] text-slate-500">Near {lot.nearestGate} • {lot.walkTimeMinutes} min walk</p>
+                      </div>
+                      <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md text-[10px] font-bold border border-emerald-100">
+                        ${lot.priceUSD}
+                      </span>
+                    </div>
+                    <div className="flex gap-1.5 mt-1.5">
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
+                        parseInt(lot.currentOccupancy) > 75
+                          ? 'bg-red-50 text-red-700 border border-red-200'
+                          : parseInt(lot.currentOccupancy) > 50
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-green-50 text-green-700 border border-green-200'
+                      }`}>
+                        {lot.currentOccupancy} Full
+                      </span>
+                      {lot.evCharging && (
+                        <span className="text-[8px] text-emerald-700 bg-emerald-50 border border-emerald-200 font-bold px-1.5 py-0.5 rounded-md">
+                          ⚡ EV Charging
+                        </span>
+                      )}
+                      {lot.accessible && (
+                        <span className="text-[8px] text-blue-700 bg-blue-50 border border-blue-200 font-bold px-1.5 py-0.5 rounded-md">
+                          ♿ Accessible
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Public Transit */}
+            <div>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <Train size={12} className="text-indigo-500" /> Public Transit
+              </span>
+              <div className="space-y-2">
+                {(stadiumData?.transportation?.publicTransit || []).map((route, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                    <span className="text-xs font-bold text-slate-800">{route.name}</span>
+                    <p className="text-[9px] text-slate-500 mt-0.5">{route.frequency}</p>
+                    <div className="flex justify-between items-center mt-1.5">
+                      <span className="text-[9px] text-indigo-600 font-bold">
+                        ${route.fareUSD?.toFixed(2)} fare
+                      </span>
+                      <span className="text-[9px] text-slate-500">
+                        {route.walkTimeToStadiumMinutes} min walk to stadium
+                      </span>
+                    </div>
+                    {route.notes && (
+                      <p className="text-[8px] text-slate-400 mt-1 italic">{route.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Shuttles */}
+            <div>
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <Bus size={12} className="text-indigo-500" /> FIFA Fan Shuttles (Free)
+              </span>
+              <div className="space-y-2">
+                {(stadiumData?.transportation?.shuttleBuses || []).map((shuttle, idx) => (
+                  <div key={idx} className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                    <span className="text-xs font-bold text-slate-800">{shuttle.name}</span>
+                    <p className="text-[9px] text-slate-500 mt-0.5">
+                      {shuttle.pickupLocation} → {shuttle.dropoffLocation}
+                    </p>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-[9px] text-emerald-600 font-bold">FREE • {shuttle.frequency}</span>
+                      <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md ${
+                        shuttle.status === 'Running'
+                          ? 'bg-green-50 text-green-700 border border-green-200'
+                          : 'bg-red-50 text-red-700 border border-red-200'
+                      }`}>
+                        {shuttle.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rideshare */}
+            {stadiumData?.transportation?.rideshare && (
+              <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                  🚕 Rideshare (Uber / Lyft)
+                </span>
+                <p className="text-xs font-bold text-slate-800">
+                  Pickup: {stadiumData.transportation.rideshare.designatedPickupZone}
+                </p>
+                <p className="text-[9px] text-slate-500 mt-0.5">
+                  Near {stadiumData.transportation.rideshare.nearestGate} • {stadiumData.transportation.rideshare.walkTimeMinutes} min walk
+                </p>
+                <p className="text-[9px] text-amber-600 font-bold mt-1">
+                  Surge: {stadiumData.transportation.rideshare.surgeStatus}
+                </p>
+                <p className="text-[8px] text-slate-400 italic mt-1">
+                  💡 {stadiumData.transportation.rideshare.tips}
+                </p>
+              </div>
+            )}
+
+            {/* Sustainability Section */}
+            <div className="border-t border-slate-200 pt-3">
+              <span className="block text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <Leaf size={12} /> Sustainability & Eco Initiatives
+              </span>
+
+              {/* Carbon Offset Progress */}
+              {stadiumData?.sustainability?.carbonOffsetProgram && (
+                <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-200 mb-3">
+                  <span className="text-[10px] font-bold text-emerald-800 uppercase">
+                    🌳 {stadiumData.sustainability.carbonOffsetProgram.name}
+                  </span>
+                  <p className="text-[9px] text-emerald-700 mt-0.5">
+                    {stadiumData.sustainability.carbonOffsetProgram.description}
+                  </p>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-[8px] text-emerald-700 font-bold mb-1">
+                      <span>{stadiumData.sustainability.carbonOffsetProgram.treesPlantedSoFar.toLocaleString()} trees</span>
+                      <span>Goal: {stadiumData.sustainability.carbonOffsetProgram.goalTrees.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full bg-emerald-200 rounded-full h-2">
+                      <div
+                        className="bg-emerald-600 h-2 rounded-full transition-all"
+                        style={{ width: `${Math.min(100, (stadiumData.sustainability.carbonOffsetProgram.treesPlantedSoFar / stadiumData.sustainability.carbonOffsetProgram.goalTrees) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Recycling Stations */}
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                <Recycle size={11} className="text-emerald-500" /> Recycling Stations
+              </span>
+              <div className="space-y-2 mb-3">
+                {(stadiumData?.sustainability?.recyclingStations || []).map((station, idx) => (
+                  <div key={idx} className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-xs font-bold text-slate-800">{station.name}</span>
+                        <p className="text-[9px] text-slate-500">📍 {station.location}</p>
+                      </div>
+                      <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-green-50 text-green-700 border border-green-200">
+                        {station.status}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {station.acceptedMaterials.map((mat, mIdx) => (
+                        <span key={mIdx} className="text-[8px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">
+                          {mat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Water Refill Stations */}
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                <Droplets size={11} className="text-blue-500" /> Water Refill Stations
+              </span>
+              <div className="space-y-2 mb-3">
+                {(stadiumData?.sustainability?.waterRefillStations || []).map((station, idx) => (
+                  <div key={idx} className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800">{station.name}</span>
+                      <p className="text-[9px] text-slate-500">📍 {station.location}</p>
+                    </div>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">
+                      {station.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Eco Initiatives List */}
+              <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                🌍 Green Initiatives
+              </span>
+              <div className="space-y-1.5">
+                {(stadiumData?.sustainability?.ecoInitiatives || []).map((initiative, idx) => (
+                  <div key={idx} className="bg-white p-2.5 rounded-xl border border-slate-200 text-[10px] text-slate-600 flex gap-2">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <p className="leading-relaxed">{initiative}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

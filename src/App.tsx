@@ -19,9 +19,10 @@ export default function App() {
   // Global View State
   const [currentLocation, setCurrentLocation] = useState<string>('100-Level (Lower Bowl) - MetLife Gate');
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
-  const [rightActiveTab, setRightActiveTab] = useState<'map' | 'concessions' | 'rules'>('map');
+  const [rightActiveTab, setRightActiveTab] = useState<'map' | 'concessions' | 'rules' | 'transport'>('map');
   const [mobileTab, setMobileTab] = useState<'controls' | 'chat' | 'deck'>('chat');
   const [isLocationDropdownOpen, setIsLocationDropdownOpen] = useState<boolean>(false);
+  const [isStaffMode, setIsStaffMode] = useState<boolean>(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +36,7 @@ export default function App() {
     addMessage,
     handleSendMessage: sendChatToApi,
     toggleSpeakMessage,
-  } = useStadiumChat(currentLocation, selectedLanguage);
+  } = useStadiumChat(currentLocation, selectedLanguage, isStaffMode);
 
   const { gpsLoading, detectedCoords, customDetectedLocations, handleDetectLocation } = useGeolocation(
     setCurrentLocation,
@@ -158,6 +159,8 @@ export default function App() {
           setRightActiveTab={setRightActiveTab}
           handleSendMessage={handleSendMessage}
           addMessage={addMessage}
+          isStaffMode={isStaffMode}
+          setIsStaffMode={setIsStaffMode}
         />
 
         <ChatFeed

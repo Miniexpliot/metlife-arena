@@ -1,6 +1,6 @@
 {
   "name": "Smart Stadium Companion",
-  "description": "A Fan-First Smart Stadium Companion for the FIFA World Cup 2026 featuring interactive AI assistance, location-aware navigation, and real-time crowd insights.",
+  "description": "A GenAI-enabled Smart Stadium Companion for the FIFA World Cup 2026 featuring interactive AI assistance, location-aware navigation, real-time crowd management, multilingual support, transportation guidance (parking, transit, shuttles, rideshare), sustainability tracking (recycling, water refill, carbon offset), and operational intelligence for fans, organizers, volunteers, and venue staff.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

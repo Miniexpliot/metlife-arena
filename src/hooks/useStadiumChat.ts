@@ -14,7 +14,8 @@ const MAX_HISTORY_SENT = 30;
  */
 export function useStadiumChat(
   currentLocation: string,
-  selectedLanguage: string
+  selectedLanguage: string,
+  isStaffMode: boolean = false
 ) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const savedMessages = localStorage.getItem('STADIUM_CHAT_HISTORY');
@@ -117,6 +118,7 @@ export function useStadiumChat(
           message: textToSend,
           history: trimmedHistory,
           currentLocation: `${locationContext} (Language Preferred: ${selectedLanguage})`,
+          isStaffMode: isStaffMode,
         }),
       });
 

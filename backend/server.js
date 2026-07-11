@@ -132,6 +132,11 @@ function getGeminiClient() {
  * user's current location. Passing only the relevant sector reduces Gemini
  * prompt size by ~70% versus sending the entire JSON on every request.
  *
+ * PROBLEM STATEMENT ALIGNMENT:
+ * Now includes transportation (parking, transit, shuttles, rideshare) and
+ * sustainability (recycling, water refill, eco-initiatives) data to cover
+ * ALL verticals specified in the FIFA World Cup 2026 problem statement.
+ *
  * Falls back to the full database if no sector match is found so the AI can
  * still give a helpful general answer.
  */
@@ -160,6 +165,10 @@ function buildRagContext(location) {
     stadiumConcessionsIndex: allConcessionsSummary,
     // Detailed menus and wait times scoped specifically to current sector (or all if not matched)
     currentSectorDetails: matchedSector ? [matchedSector] : stadiumData.sectors,
+    // Transportation data: parking lots, public transit, shuttles, rideshare zones
+    transportation: stadiumData.transportation || null,
+    // Sustainability data: recycling stations, water refill, eco-initiatives, carbon offset
+    sustainability: stadiumData.sustainability || null,
   };
 
   return JSON.stringify(ragPayload, null, 2);
@@ -261,7 +270,7 @@ const MAX_CACHE_SIZE = 500; // LRU eviction cap to prevent unbounded memory grow
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, history, currentLocation } = req.body;
+    const { message, history, currentLocation, isStaffMode } = req.body;
 
     // ── Input validation ──────────────────────────────────────────────────
     if (!message || typeof message !== 'string' || message.length > 500) {
@@ -337,7 +346,8 @@ app.post('/api/chat', async (req, res) => {
     // ── Location-aware RAG context (sector-scoped, not full DB) ──────────
     const ragContext = buildRagContext(currentLocation);
 
-    const systemInstruction = getSystemInstruction(currentLocation, ragContext);
+    // Pass staff mode flag to system prompt for organizer/volunteer/staff support
+    const systemInstruction = getSystemInstruction(currentLocation, ragContext, Boolean(isStaffMode));
 
     // Build conversation history for Gemini
     const contents = [];

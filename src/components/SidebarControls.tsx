@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, ChevronDown, Compass, Globe, Shield, AlertCircle } from 'lucide-react';
+import { MapPin, ChevronDown, Compass, Globe, Shield, AlertCircle, Users } from 'lucide-react';
 import { LANGUAGE_OPTIONS } from '../constants/languages';
 import type { ChatMessage } from '../types';
 
@@ -21,6 +21,8 @@ interface SidebarControlsProps {
   setRightActiveTab: (tab: 'map' | 'concessions' | 'rules') => void;
   handleSendMessage: (text: string) => void;
   addMessage: (msg: ChatMessage) => void;
+  isStaffMode: boolean;
+  setIsStaffMode: (mode: boolean) => void;
 }
 
 export default function SidebarControls({
@@ -40,6 +42,8 @@ export default function SidebarControls({
   setRightActiveTab,
   handleSendMessage,
   addMessage,
+  isStaffMode,
+  setIsStaffMode,
 }: SidebarControlsProps) {
   return (
     <aside
@@ -253,6 +257,46 @@ export default function SidebarControls({
               <span className="text-[10px] text-slate-500 font-medium pb-0.5">{vitals.flow}</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Staff / Volunteer Mode Toggle — Problem Statement: Organizer & Staff Support */}
+      <div className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-[11px] font-bold text-amber-900 uppercase flex items-center gap-1.5 mb-0.5">
+              <Users size={12} className="text-amber-600" /> Staff / Volunteer Mode
+            </h4>
+            <p className="text-[9px] text-amber-700 leading-relaxed">
+              {isStaffMode
+                ? 'AI provides operational intelligence for venue staff'
+                : 'Switch to receive crowd management & ops data'}
+            </p>
+          </div>
+          <button
+            id="staff_mode_toggle"
+            role="switch"
+            aria-checked={isStaffMode}
+            aria-label={isStaffMode ? 'Disable staff mode' : 'Enable staff and volunteer mode'}
+            onClick={() => {
+              setIsStaffMode(!isStaffMode);
+              addMessage({
+                role: 'model',
+                text: isStaffMode
+                  ? '🎟️ **Fan Mode Activated**. The AI companion will now focus on matchday experience — food, navigation, translations, and entertainment queries.'
+                  : '👷 **Staff/Volunteer Mode Activated**. The AI is now configured for operational intelligence — crowd management, supply monitoring, volunteer coordination, incident triage, and sustainability compliance.',
+              });
+            }}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 cursor-pointer ${
+              isStaffMode ? 'bg-amber-500' : 'bg-slate-300'
+            }`}
+          >
+            <span
+              className={`block w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 mt-0.5 ${
+                isStaffMode ? 'translate-x-[22px]' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
         </div>
       </div>
 

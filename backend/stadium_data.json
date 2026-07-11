@@ -263,5 +263,155 @@
       "No umbrellas, professional cameras, or outside alcoholic beverages.",
       "Identify the nearest exit sign illuminated above the concourse portals."
     ]
+  },
+  "transportation": {
+    "parking": [
+      {
+        "name": "Lot E (East General)",
+        "type": "car",
+        "capacity": 4000,
+        "currentOccupancy": "55%",
+        "priceUSD": 30,
+        "nearestGate": "Verizon Gate",
+        "walkTimeMinutes": 10,
+        "evCharging": false,
+        "accessible": true,
+        "status": "Open"
+      },
+      {
+        "name": "Lot G (West Premium)",
+        "type": "car",
+        "capacity": 2000,
+        "currentOccupancy": "80%",
+        "priceUSD": 55,
+        "nearestGate": "MetLife Gate",
+        "walkTimeMinutes": 6,
+        "evCharging": true,
+        "accessible": true,
+        "status": "Open"
+      },
+      {
+        "name": "Lot L (South Economy)",
+        "type": "car",
+        "capacity": 3000,
+        "currentOccupancy": "40%",
+        "priceUSD": 25,
+        "nearestGate": "Bud Light Gate",
+        "walkTimeMinutes": 18,
+        "evCharging": true,
+        "accessible": true,
+        "status": "Open"
+      }
+    ],
+    "publicTransit": [
+      {
+        "name": "NJ Transit Rail — Meadowlands Line",
+        "type": "rail",
+        "station": "Meadowlands Station",
+        "walkTimeToStadiumMinutes": 5,
+        "frequency": "Every 10 minutes on matchday",
+        "operatingHours": "4 hours before kickoff to 2 hours after final whistle",
+        "fareUSD": 5.50,
+        "accessible": true,
+        "notes": "Direct service from Secaucus Junction. Connects to NJ Transit Northeast Corridor and Amtrak."
+      },
+      {
+        "name": "NJ Transit Bus 160/161",
+        "type": "bus",
+        "pickupLocation": "Port Authority Bus Terminal, Manhattan",
+        "dropoffLocation": "MetLife Stadium East Lot",
+        "walkTimeToStadiumMinutes": 10,
+        "frequency": "Every 15 minutes on matchday",
+        "fareUSD": 4.00,
+        "accessible": true,
+        "notes": "Express service from Port Authority NYC."
+      }
+    ],
+    "shuttleBuses": [
+      {
+        "name": "FIFA Fan Shuttle (North Route)",
+        "pickupLocation": "Secaucus Junction Station",
+        "dropoffLocation": "MetLife Gate Forecourt",
+        "frequency": "Every 8 minutes",
+        "operatingHours": "3 hours pre-match to 90 min post-match",
+        "fareUSD": 0,
+        "accessible": true,
+        "status": "Running"
+      },
+      {
+        "name": "FIFA Fan Shuttle (South Route)",
+        "pickupLocation": "Newark Penn Station",
+        "dropoffLocation": "Bud Light Gate Forecourt",
+        "frequency": "Every 12 minutes",
+        "operatingHours": "3 hours pre-match to 90 min post-match",
+        "fareUSD": 0,
+        "accessible": true,
+        "status": "Running"
+      }
+    ],
+    "rideshare": {
+      "designatedPickupZone": "Lot J (Rideshare Only)",
+      "nearestGate": "Pepsi Gate",
+      "walkTimeMinutes": 8,
+      "surgeStatus": "Moderate (1.5x)",
+      "providers": ["Uber", "Lyft"],
+      "tips": "Pre-schedule your post-match ride 30 minutes before the final whistle to avoid 3x surge pricing."
+    }
+  },
+  "sustainability": {
+    "overview": "MetLife Stadium is committed to achieving a carbon-neutral FIFA World Cup 2026 experience through waste diversion, renewable energy, and fan-driven eco-initiatives.",
+    "recyclingStations": [
+      {
+        "name": "Eco Station Alpha",
+        "location": "Near MetLife Gate Concourse",
+        "acceptedMaterials": ["Plastic Bottles", "Aluminum Cans", "Paper/Cardboard"],
+        "status": "Open"
+      },
+      {
+        "name": "Eco Station Beta",
+        "location": "Near HCLTech Gate Concourse",
+        "acceptedMaterials": ["Plastic Bottles", "Aluminum Cans", "Glass"],
+        "status": "Open"
+      },
+      {
+        "name": "Eco Station Gamma",
+        "location": "Near Pepsi Gate Concourse",
+        "acceptedMaterials": ["Plastic Bottles", "Aluminum Cans", "Paper/Cardboard", "Compostable Food Waste"],
+        "status": "Open"
+      }
+    ],
+    "waterRefillStations": [
+      {
+        "name": "Hydration Point 1",
+        "location": "Section 108 Concourse",
+        "type": "Filtered Water Fountain",
+        "status": "Active"
+      },
+      {
+        "name": "Hydration Point 2",
+        "location": "Section 218 Concourse",
+        "type": "Filtered Water Fountain",
+        "status": "Active"
+      },
+      {
+        "name": "Hydration Point 3",
+        "location": "Section 312 Concourse",
+        "type": "Filtered Water Fountain & Misting Station",
+        "status": "Active"
+      }
+    ],
+    "ecoInitiatives": [
+      "100% of stadium power supplied by on-site solar panels and regional wind energy credits.",
+      "All concession packaging is compostable — zero single-use plastics.",
+      "FIFA Fan Carbon Offset program: scan your ticket QR code at any Eco Station to log your personal offset contribution.",
+      "Post-match waste target: 90% diversion from landfill through recycling and composting.",
+      "Electric vehicle charging available in Lots G and L at subsidized matchday rates."
+    ],
+    "carbonOffsetProgram": {
+      "name": "FIFA Green Goal 2026",
+      "description": "Fans can contribute to FIFA's carbon offset program by scanning their ticket at any Eco Station. Each scan logs a tree-planting pledge.",
+      "treesPlantedSoFar": 14500,
+      "goalTrees": 50000
+    }
   }
 }
